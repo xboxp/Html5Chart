@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>iChart Sample</title>
+    <style type="text/css">
+        body{
+            background-color: black;
+        }
+
+        div.wrapper {
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            padding-top: 100px;
+        }
+
+        canvas.container {
+            width: 640px;
+            height: 360px;
+            background-color: darkolivegreen;
+        }
+    </style>
+    <script type="text/javascript" src="../release/iChart.js"></script>
+</head>
+<body>
+<div class="wrapper">
+    <canvas id="iChartCanvas" class="container"></canvas>
+    <script>
+        var canvas = document.getElementById("iChartCanvas");
+        var chart = new iChart.BarChart(canvas, {param:"param"});
+        chart.drawChart();
+    </script>
+</div>
+</body>
+</html>
