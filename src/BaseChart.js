@@ -36,7 +36,7 @@ window.iChart = window.iChart || {};
      data sample:
      [{day:'1', t:30}, {day:'2', t:31}, {day:'3', t:29}]
      */
-    var padding     = 10;
+    var padding     = 10;  // default padding
     var gap         = 10;
     var legendHeight = 10;
     var legendWidth  = 20;
@@ -88,6 +88,9 @@ window.iChart = window.iChart || {};
             return false;
         }
 
+        this.headerHeight = 0;
+        this.legendHeight = 0;
+
         return true;
     }
 
@@ -106,11 +109,14 @@ window.iChart = window.iChart || {};
 
     p._drawTitle = function(){
         if(this.title.label != ""){
-            this.context.font = this.title.font;
+            var top  = this.title.top;
 
+            this.context.font = this.title.font;
             this.context.textAlign = 'center';
             this.context.fillStyle = this.title.color;
-            this.context.fillText(this.title.label, this.width/2, this.title.top);
+            this.context.fillText(this.title.label, this.width/2, top);
+
+            this.headerHeight = top + global.Utils.calculateFontSize(this.context.font)/2;
         }
     }
 
@@ -123,7 +129,13 @@ window.iChart = window.iChart || {};
     }
 
     p._drawAxes = function(){
+        var x = padding,
+            y = this.headerHeight;
 
+        this.context.beginPath();
+        this.context.moveTo(padding, this.headerHeight);
+        this.context.lineTo(this.width-padding, this.headerHeight);
+        this.context.stroke();
     }
 
     /**
@@ -136,7 +148,6 @@ window.iChart = window.iChart || {};
     p._createTooltip = function(){
 
     }
-
 
     global.BaseChart = BaseChart;
 })(window.iChart);

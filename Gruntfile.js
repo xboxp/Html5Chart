@@ -8,7 +8,7 @@ module.exports = function(grunt) {
 
         concat: {
             concat: {
-                src: ['src/BaseChart.js', 'src/BarChart.js'],
+                src: ['src/Utils.js', 'src/BaseChart.js', 'src/BarChart.js'],
                 dest: 'release/<%= pkg.name %>.js'
             }
         },
