@@ -16,19 +16,46 @@
         }
 
         canvas.container {
-            width: 640px;
-            height: 360px;
-            background-color: darkolivegreen;
+            background-color: white;
         }
     </style>
     <script type="text/javascript" src="../release/iChart.js"></script>
 </head>
 <body>
 <div class="wrapper">
-    <canvas id="iChartCanvas" class="container"></canvas>
+    <canvas id="iChartCanvas" class="container" width="640px" height="360px"></canvas>
     <script>
+        var data    = [{day:'1', t:30}, {day:'2', t:31}, {day:'3', t:29}];
+        var param   =  {
+            dataProvider: data,
+            animated:true,
+            showTooltip: true,
+            showLegend: true,
+            title: {
+                label:'Temperature in Beijing:July 2014',
+                color:"#555",
+                font:"bold 14pt Segoe UI Light",
+                top:20
+            },
+            series: [{
+                xField: 'day',
+                yField: 't',
+                fillColor: '#0f0',
+                strokeColor: '#00f',
+                fillAlpha: 1,
+                strokeAlpha: 1,
+                legendLabel: 'Temperature'
+            }],
+            yAxis: {
+                min: 5,
+                labelFunction:  function() {
+                    return this.valueText + '&#176C';
+                }
+            }
+        };
+
         var canvas = document.getElementById("iChartCanvas");
-        var chart = new iChart.BarChart(canvas, {param:"param"});
+        var chart = new iChart.BarChart(canvas, param);
         chart.drawChart();
     </script>
 </div>
