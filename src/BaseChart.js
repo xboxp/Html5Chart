@@ -26,7 +26,6 @@ window.iChart = window.iChart || {};
             strokeAlpha: 1
         }],
         yAxis: {
-            min: 5,
             labelFunction:  function() {
                 return this.valueText + '&#176C';
             }
@@ -42,12 +41,11 @@ window.iChart = window.iChart || {};
      data sample:
      [{day:'1', t:30}, {day:'2', t:31}, {day:'3', t:29}]
      */
-    var padding     = 5;  // default padding
-    var gap         = 10;
+    var PADDING     = 5;  // default padding
     var legendHeight = 10;
     var legendWidth  = 20;
     var minWidth    = 100;
-    var minHeight   = 2 * padding + legendHeight;
+    var minHeight   = 2 * PADDING + legendHeight;
 
     var BaseChart = function(canvas, parameters){
         this.canvas = canvas;
@@ -65,8 +63,8 @@ window.iChart = window.iChart || {};
      */
     p.initialize = function(){
         var mustHaveProperties = ['dataProvider', 'series'];
-        var defaults = {animated:true, showTooltip:true, showLegend:true,
-            title:{label:'', color:'#000', font:"14px Segoe UI Light", top:padding}};
+        var defaults = {animated:true, showTooltip:true, showLegend:true, showGrid:true,
+            title:{label:'', color:'#000', font:"14px Segoe UI Light", top:PADDING}};
 
         if(this.parameters == undefined || this.parameters == null){
             console.error('Error: miss param ');
@@ -97,6 +95,8 @@ window.iChart = window.iChart || {};
         this.headerHeight = 0;
         this.legendHeight = 0;
 
+        this.paddingRight = 2 * PADDING;
+
         return true;
     }
 
@@ -107,7 +107,7 @@ window.iChart = window.iChart || {};
         if(this.initialize()){
             this._drawTitle();
             this._drawLegend();
-            this._draw(padding);
+            this._draw(PADDING);
             this._createTooltip();
         }
     }

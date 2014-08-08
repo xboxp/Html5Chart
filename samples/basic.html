@@ -25,21 +25,21 @@
 <div class="wrapper">
     <canvas id="iChartCanvas" class="container" width="1024px" height="768px"></canvas>
     <script>
-        var data    = [{day:'1', t:35, m:56}, {day:'2', t:25, m:60}, {day:'3', t:30, m:50}];
+        var data    = [{day:'1', r:3500, p:1123}, {day:'2', r:2500, p:813}, {day:'3', r:3000, p:1024}];
         var param   =  {
             dataProvider: data,
             animated:true,
             showTooltip: true,
             showLegend: true,
             title: {
-                label:'Temperature in Beijing:July 2014',
+                label:'Apple Inc profit:July 2014',
                 color:"#555",
                 font:"bold 15pt Segoe UI Light",
                 top:20
             },
             series: [{
                 xField: 'day',
-                yField: 't',
+                yField: 'r',
                 fillColor: '#0f0',
                 strokeColor: '#00f',
                 fillAlpha: 1,
@@ -48,7 +48,7 @@
             },
             {
                 xField: 'day',
-                yField: 'm',
+                yField: 'p',
                 fillColor: '#0f0',
                 strokeColor: '#00f',
                 fillAlpha: 1,
@@ -57,7 +57,7 @@
             }],
             yAxis: {
                 labelFunction:  function(value) {
-                    return value > 0 ? (value/10000 + 'w'):value;
+                    return value > 0 ? (value/1000 + 'k'):value;
                 }
             }
         };

@@ -4,6 +4,8 @@
 window.iChart = window.iChart || {};
 
 (function(global){
+    var DISPLAY_RATIO = 0.5;
+
     var Utils = {
         calculateFontSize : function(font){
             if(font && font != ''){
@@ -82,7 +84,7 @@ window.iChart = window.iChart || {};
                     scales.push(step*i);
                 }
             }else{
-                if(max > Math.pow(10, scale)*0.8){
+                if(max > Math.pow(10, scale) * DISPLAY_RATIO){
                     step = 2 * Math.pow(10, scale-1);
                     for(var i = 1; i <= defaultLength; i++){
                         scales.push(step*i);

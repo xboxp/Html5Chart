@@ -4,6 +4,8 @@
 window.iChart = window.iChart || {};
 
 (function(global){
+    var DISPLAY_RATIO = 0.5;
+
     var Utils = {
         calculateFontSize : function(font){
             if(font && font != ''){
@@ -82,7 +84,7 @@ window.iChart = window.iChart || {};
                     scales.push(step*i);
                 }
             }else{
-                if(max > Math.pow(10, scale)*0.8){
+                if(max > Math.pow(10, scale) * DISPLAY_RATIO){
                     step = 2 * Math.pow(10, scale-1);
                     for(var i = 1; i <= defaultLength; i++){
                         scales.push(step*i);
@@ -129,7 +131,6 @@ window.iChart = window.iChart || {};
             strokeAlpha: 1
         }],
         yAxis: {
-            min: 5,
             labelFunction:  function() {
                 return this.valueText + '&#176C';
             }
@@ -145,12 +146,11 @@ window.iChart = window.iChart || {};
      data sample:
      [{day:'1', t:30}, {day:'2', t:31}, {day:'3', t:29}]
      */
-    var padding     = 5;  // default padding
-    var gap         = 10;
+    var PADDING     = 5;  // default padding
     var legendHeight = 10;
     var legendWidth  = 20;
     var minWidth    = 100;
-    var minHeight   = 2 * padding + legendHeight;
+    var minHeight   = 2 * PADDING + legendHeight;
 
     var BaseChart = function(canvas, parameters){
         this.canvas = canvas;
@@ -168,8 +168,8 @@ window.iChart = window.iChart || {};
      */
     p.initialize = function(){
         var mustHaveProperties = ['dataProvider', 'series'];
-        var defaults = {animated:true, showTooltip:true, showLegend:true,
-            title:{label:'', color:'#000', font:"14px Segoe UI Light", top:padding}};
+        var defaults = {animated:true, showTooltip:true, showLegend:true, showGrid:true,
+            title:{label:'', color:'#000', font:"14px Segoe UI Light", top:PADDING}};
 
         if(this.parameters == undefined || this.parameters == null){
             console.error('Error: miss param ');
@@ -200,6 +200,8 @@ window.iChart = window.iChart || {};
         this.headerHeight = 0;
         this.legendHeight = 0;
 
+        this.paddingRight = 2 * PADDING;
+
         return true;
     }
 
@@ -210,7 +212,7 @@ window.iChart = window.iChart || {};
         if(this.initialize()){
             this._drawTitle();
             this._drawLegend();
-            this._draw(padding);
+            this._draw(PADDING);
             this._createTooltip();
         }
     }
@@ -256,7 +258,7 @@ window.iChart = window.iChart || {};
  * Created by David Zhang on 2014/8/8.
  */
 (function(global){
-    var SCALE_LENGTH = 5;
+    var SCALE_LENGTH = 6;
 
     var AxesChart = function(ctx, param){
         global.BaseChart.call(this, ctx, param);
@@ -265,7 +267,6 @@ window.iChart = window.iChart || {};
     var p = AxesChart.prototype = Object.create(global.BaseChart.prototype);
 
     AxesChart.prototype.parent = global.BaseChart.prototype;
-
 
     // override
     p._draw = function(padding){
@@ -288,20 +289,21 @@ window.iChart = window.iChart || {};
         this.origin = {x:(padding+labelWidth), y:(this.height - this.legendHeight - labelHeight)};
 
         var yAxisStartX = x + labelWidth;
-        var xAxisEndX = this.width - padding;
+        var xAxisEndX = this.width - this.paddingRight;
 
         this.yAxisLength = this.origin.y - y;
         this.xAxisLength = xAxisEndX - this.origin.x;
 
             // draw x and y axes
+        this.context.strokeStyle="#e5e5e5";
+        this.context.lineWidth = "1";
+
         this.context.beginPath();
         this.context.moveTo(yAxisStartX, y);
         this.context.lineTo(this.origin.x, this.origin.y);
-        this.context.stroke();
-
-        this.context.beginPath();
-        this.context.moveTo(this.origin.x, this.origin.y);
         this.context.lineTo(xAxisEndX, this.origin.y);
+        this.context.lineTo(xAxisEndX, y);
+        this.context.lineTo(yAxisStartX, y);
         this.context.stroke();
 
         // draw scales
@@ -310,10 +312,16 @@ window.iChart = window.iChart || {};
             var step = this.yAxisLength/(scales.length-1);
             for(var i = 0; i < scales.length; i++){
                 var currentY = this.origin.y - step*i;
-                var value = yAxisLabelFun == undefined ? scales[i] : yAxisLabelFun.call(this, scales[i]);
+                var value = yAxisLabelFun == undefined ? scales[i] : yAxisLabelFun.call(null, scales[i]);
                 this.context.beginPath();
+                this.context.lineWidth = i%2 == 0 ? "2":"1";
+                this.context.strokeStyle="#e5e5e5";
                 this.context.moveTo(this.origin.x, currentY);
                 this.context.lineTo(this.origin.x - SCALE_LENGTH, currentY);
+
+                if(this.showGrid){
+                    this.context.lineTo(xAxisEndX, currentY);
+                }
                 this.context.stroke();
 
                 this.context.font = '4px Arial';
