@@ -3,16 +3,16 @@
  */
 (function(global){
     var BarChart = function(ctx, param){
-        global.BaseChart.call(this, ctx, param);
+        global.AxesChart.call(this, ctx, param);
     }
 
-    var p = BarChart.prototype = Object.create(global.BaseChart.prototype);
+    var p = BarChart.prototype = Object.create(global.AxesChart.prototype);
 
-    BarChart.prototype.parent = global.BaseChart.prototype;
+    BarChart.prototype.parent = global.AxesChart.prototype;
 
 
     // override
-    p._draw = function(){
+    p._drawDataArea = function(){
 
     }
 

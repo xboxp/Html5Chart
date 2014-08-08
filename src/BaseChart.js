@@ -31,12 +31,18 @@ window.iChart = window.iChart || {};
                 return this.valueText + '&#176C';
             }
         }
+
+        xAxis: {
+            labelFunction: function() {
+                return 'Jul ' + this.valueText;
+            }
+        }
      }
 
      data sample:
      [{day:'1', t:30}, {day:'2', t:31}, {day:'3', t:29}]
      */
-    var padding     = 10;  // default padding
+    var padding     = 5;  // default padding
     var gap         = 10;
     var legendHeight = 10;
     var legendWidth  = 20;
@@ -95,18 +101,20 @@ window.iChart = window.iChart || {};
     }
 
     /**
-     * public method to user
+     * public methods to user
      */
     p.drawChart = function(){
         if(this.initialize()){
             this._drawTitle();
             this._drawLegend();
-            this._drawAxes();
-            this._draw();
+            this._draw(padding);
             this._createTooltip();
         }
     }
 
+    /**
+     * protected methods
+     */
     p._drawTitle = function(){
         if(this.title.label != ""){
             var top  = this.title.top;
@@ -126,16 +134,6 @@ window.iChart = window.iChart || {};
                 var s = this.parameters.series[i];
             }
         }
-    }
-
-    p._drawAxes = function(){
-        var x = padding,
-            y = this.headerHeight;
-
-        this.context.beginPath();
-        this.context.moveTo(padding, this.headerHeight);
-        this.context.lineTo(this.width-padding, this.headerHeight);
-        this.context.stroke();
     }
 
     /**

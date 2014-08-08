@@ -23,9 +23,9 @@
 </head>
 <body>
 <div class="wrapper">
-    <canvas id="iChartCanvas" class="container" width="640px" height="360px"></canvas>
+    <canvas id="iChartCanvas" class="container" width="1024px" height="768px"></canvas>
     <script>
-        var data    = [{day:'1', t:30}, {day:'2', t:31}, {day:'3', t:29}];
+        var data    = [{day:'1', t:35, m:56}, {day:'2', t:25, m:60}, {day:'3', t:30, m:50}];
         var param   =  {
             dataProvider: data,
             animated:true,
@@ -45,11 +45,19 @@
                 fillAlpha: 1,
                 strokeAlpha: 1,
                 legendLabel: 'Temperature'
+            },
+            {
+                xField: 'day',
+                yField: 'm',
+                fillColor: '#0f0',
+                strokeColor: '#00f',
+                fillAlpha: 1,
+                strokeAlpha: 1,
+                legendLabel: 'Humidity'
             }],
             yAxis: {
-                min: 5,
-                labelFunction:  function() {
-                    return this.valueText + '&#176C';
+                labelFunction:  function(value) {
+                    return value > 0 ? (value/10000 + 'w'):value;
                 }
             }
         };

@@ -8,7 +8,7 @@ module.exports = function(grunt) {
 
         concat: {
             concat: {
-                src: ['src/Utils.js', 'src/BaseChart.js', 'src/BarChart.js'],
+                src: ['src/Utils.js', 'src/BaseChart.js', 'src/AxesChart.js', 'src/BarChart.js'],
                 dest: 'release/<%= pkg.name %>.js'
             }
         },
@@ -17,11 +17,17 @@ module.exports = function(grunt) {
                 src: 'release/<%= pkg.name %>.js',
                 dest: 'release/<%= pkg.name %>.min.js'
             }
+        },
+
+        qunit: {
+            all: ['test/*.html']
         }
     });
 
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-concat');
+    grunt.loadNpmTasks('grunt-contrib-qunit');
 
     grunt.registerTask('default', ['concat', 'uglify']);
+    grunt.registerTask('test', ['concat', 'qunit']);
 }
