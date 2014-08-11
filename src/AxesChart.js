@@ -2,7 +2,8 @@
  * Created by David Zhang on 2014/8/8.
  */
 (function(global){
-    var SCALE_LENGTH = 6;
+    var SCALE_LINE_WIDTH = 6;
+    var LINE_COLOR = "gray";
 
     var AxesChart = function(ctx, param){
         global.BaseChart.call(this, ctx, param);
@@ -22,32 +23,36 @@
         var x = padding,
             y = this.headerHeight;
 
-        var data = this.parameters.dataProvider,
+        var data = this.getData(),
             series = this.parameters.series,
             max  = global.Utils.findMax(data, series),
             scales = global.Utils.getScales(max);
 
+        this.yScales = scales;
+
         var labelWidth = 40;
         var labelHeight = 20;
 
-        this.origin = {x:(padding+labelWidth), y:(this.height - this.legendHeight - labelHeight)};
+        this.origin = {x:(padding + labelWidth), y:(this.height - this.getFooterHeight() - labelHeight)};
 
         var yAxisStartX = x + labelWidth;
-        var xAxisEndX = this.width - this.paddingRight;
+        var xAxisEndX = this.width - this.getPaddingRight();
 
         this.yAxisLength = this.origin.y - y;
         this.xAxisLength = xAxisEndX - this.origin.x;
 
-            // draw x and y axes
-        this.context.strokeStyle="#e5e5e5";
+        // draw x and y axes
+        this.context.strokeStyle= LINE_COLOR;
         this.context.lineWidth = "1";
 
         this.context.beginPath();
         this.context.moveTo(yAxisStartX, y);
         this.context.lineTo(this.origin.x, this.origin.y);
         this.context.lineTo(xAxisEndX, this.origin.y);
-        this.context.lineTo(xAxisEndX, y);
-        this.context.lineTo(yAxisStartX, y);
+        if(this.showGrid){
+            this.context.lineTo(xAxisEndX, y);
+            this.context.lineTo(yAxisStartX, y);
+        }
         this.context.stroke();
 
         // draw scales
@@ -61,19 +66,20 @@
                 this.context.lineWidth = i%2 == 0 ? "2":"1";
                 this.context.strokeStyle="#e5e5e5";
                 this.context.moveTo(this.origin.x, currentY);
-                this.context.lineTo(this.origin.x - SCALE_LENGTH, currentY);
+                this.context.lineTo(this.origin.x - SCALE_LINE_WIDTH, currentY);
 
                 if(this.showGrid){
                     this.context.lineTo(xAxisEndX, currentY);
                 }
                 this.context.stroke();
 
-                this.context.font = '4px Arial';
-                this.context.textAlign = 'left';
-                this.context.fillStyle = "black";
-                this.context.fillText(value, x, currentY + 4);
+                this. printLabel(x, currentY + 4, value, 'left');
             }
         }
+    }
+
+    p.clearDataArea = function(x, y, w, h){
+        this.context.clearRect(x, y, w, h);
     }
 
     p._drawDataArea = function(){

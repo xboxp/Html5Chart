@@ -4,7 +4,7 @@
 window.iChart = window.iChart || {};
 
 (function(global){
-    var DISPLAY_RATIO = 0.5;
+    var DISPLAY_RATIO = 0.618;
 
     var Utils = {
         calculateFontSize : function(font){
@@ -21,7 +21,7 @@ window.iChart = window.iChart || {};
         },
 
         findMax : function(data, series, minimum){
-            var fields = this.getYFields(series);
+            var fields = this.getFields(series, 'yField');
             return this.findMaxInAll(data, fields, minimum);
         },
 
@@ -53,21 +53,20 @@ window.iChart = window.iChart || {};
             return max;
         },
 
-        getYFields : function(series){
+        getFields : function(series, fieldName){
             var fields = [];
             if(series && series.length > 0){
                 for(var i = 0; i < series.length; i++){
-                    fields.push(series[i].yField);
+                    fields.push(series[i][fieldName]);
                 }
             }
             return fields;
         },
 
         getScale : function(number){
-            var parts = number.toString().split('.');
-            var intValue = parseInt(parts[0]);
+            var intValue = this.floor(number);
             if(intValue > 0){       // if it is a number above 1
-                return parts[0].length;
+                return intValue.toString().length;
             } else {
                 return 0;
             }
@@ -75,29 +74,47 @@ window.iChart = window.iChart || {};
 
         getScales : function(max){
             var scales = [0];
-            var defaultLength = 5;
+            var defaultLength = 10;
             var step;
             var scale = this.getScale(max);
             if(scale <= 1){
-                step = 2;
+                step = max > 5 ? 1 : 0.5;
                 for(var i = 1; i <= defaultLength; i++){
                     scales.push(step*i);
                 }
             }else{
                 if(max > Math.pow(10, scale) * DISPLAY_RATIO){
-                    step = 2 * Math.pow(10, scale-1);
+                    step = Math.pow(10, scale-1);
                     for(var i = 1; i <= defaultLength; i++){
                         scales.push(step*i);
                     }
                 }else{
-                    step = Math.pow(10, scale-1);
+                    step = Math.pow(10, scale-1)/2;
                     var count = max/step;
-                    for(var i = 1; i <= (count+1); i++){
+                    for(var i = 1; i <= (count + 2); i++){
                         scales.push(step*i);
                     }
                 }
             }
             return scales;
+        },
+
+        calculateXAxisItemWidth : function(dataLength, seriesNum, totalLength){
+            var result = 0;
+            var maxWidth = 300;
+            var eachItemWidth = totalLength/dataLength/(seriesNum+1);  // +1 to give room to gap
+            if(eachItemWidth > 1){
+                result = eachItemWidth < maxWidth ? this.floor(eachItemWidth) : maxWidth;
+            }else{
+                result = 1;
+            }
+
+            return result;
+        },
+
+        floor : function(floatNumber){
+            var parts = floatNumber.toString().split('.');
+            return parseInt(parts[0]);
         }
     };
 
@@ -198,7 +215,9 @@ window.iChart = window.iChart || {};
         }
 
         this.headerHeight = 0;
-        this.legendHeight = 0;
+        this.legendHeight = 2*PADDING;
+
+        this.origin = {x:0, y:0};
 
         this.paddingRight = 2 * PADDING;
 
@@ -229,7 +248,7 @@ window.iChart = window.iChart || {};
             this.context.fillStyle = this.title.color;
             this.context.fillText(this.title.label, this.width/2, top);
 
-            this.headerHeight = top + global.Utils.calculateFontSize(this.context.font)/2;
+            this.headerHeight = top + global.Utils.calculateFontSize(this.context.font)/2 + PADDING;
         }
     }
 
@@ -252,13 +271,80 @@ window.iChart = window.iChart || {};
 
     }
 
+    p.getData = function(){
+        return this.parameters.dataProvider;
+    }
+
+    // layout related
+    p.getOriginPoint = function(){
+        return this.origin;
+    }
+
+    p.getXAxisLength = function(){
+        return this.xAxisLength;
+    }
+
+    p.getYAxisLength = function(){
+        return this.yAxisLength;
+    }
+
+    p.getFooterHeight = function(){
+        return this.legendHeight;
+    }
+
+    p.getDefaultPadding = function(){
+        return PADDING;
+    }
+
+    p.getPaddingRight = function(){
+        return this.paddingRight;
+    }
+
+    p.getSeries = function(){
+        return this.parameters.series;
+    }
+
+    p.getXFields = function(){
+        return global.Utils.getFields(this.getSeries(), 'xField');
+    }
+
+    p.getYFields = function(){
+        return global.Utils.getFields(this.getSeries(), 'yField');
+    }
+
+    p.getMaxScale = function(){
+        var max = 1;
+        if(this.yScales.length > 0){
+            max = this.yScales[this.yScales.length - 1];
+        }
+        return max;
+    }
+
+    p.printLabel = function(x, y, text, align){
+        this.context.font = '4px Arial';
+        this.context.textAlign = align;
+        this.context.fillStyle = "black";
+        this.context.fillText(text, x, y);
+    }
+
+    p.drawRect = function(x, y, width, height, color, strokeColor){
+        this.context.beginPath();
+        this.context.rect(x, y, width, height);
+        this.context.fillStyle = color;
+        this.context.fill();
+        this.context.lineWidth = 1;
+        this.context.strokeStyle = strokeColor;
+        this.context.stroke();
+    }
+
     global.BaseChart = BaseChart;
 })(window.iChart);
 /**
  * Created by David Zhang on 2014/8/8.
  */
 (function(global){
-    var SCALE_LENGTH = 6;
+    var SCALE_LINE_WIDTH = 6;
+    var LINE_COLOR = "gray";
 
     var AxesChart = function(ctx, param){
         global.BaseChart.call(this, ctx, param);
@@ -278,32 +364,36 @@ window.iChart = window.iChart || {};
         var x = padding,
             y = this.headerHeight;
 
-        var data = this.parameters.dataProvider,
+        var data = this.getData(),
             series = this.parameters.series,
             max  = global.Utils.findMax(data, series),
             scales = global.Utils.getScales(max);
 
+        this.yScales = scales;
+
         var labelWidth = 40;
         var labelHeight = 20;
 
-        this.origin = {x:(padding+labelWidth), y:(this.height - this.legendHeight - labelHeight)};
+        this.origin = {x:(padding + labelWidth), y:(this.height - this.getFooterHeight() - labelHeight)};
 
         var yAxisStartX = x + labelWidth;
-        var xAxisEndX = this.width - this.paddingRight;
+        var xAxisEndX = this.width - this.getPaddingRight();
 
         this.yAxisLength = this.origin.y - y;
         this.xAxisLength = xAxisEndX - this.origin.x;
 
-            // draw x and y axes
-        this.context.strokeStyle="#e5e5e5";
+        // draw x and y axes
+        this.context.strokeStyle= LINE_COLOR;
         this.context.lineWidth = "1";
 
         this.context.beginPath();
         this.context.moveTo(yAxisStartX, y);
         this.context.lineTo(this.origin.x, this.origin.y);
         this.context.lineTo(xAxisEndX, this.origin.y);
-        this.context.lineTo(xAxisEndX, y);
-        this.context.lineTo(yAxisStartX, y);
+        if(this.showGrid){
+            this.context.lineTo(xAxisEndX, y);
+            this.context.lineTo(yAxisStartX, y);
+        }
         this.context.stroke();
 
         // draw scales
@@ -317,19 +407,20 @@ window.iChart = window.iChart || {};
                 this.context.lineWidth = i%2 == 0 ? "2":"1";
                 this.context.strokeStyle="#e5e5e5";
                 this.context.moveTo(this.origin.x, currentY);
-                this.context.lineTo(this.origin.x - SCALE_LENGTH, currentY);
+                this.context.lineTo(this.origin.x - SCALE_LINE_WIDTH, currentY);
 
                 if(this.showGrid){
                     this.context.lineTo(xAxisEndX, currentY);
                 }
                 this.context.stroke();
 
-                this.context.font = '4px Arial';
-                this.context.textAlign = 'left';
-                this.context.fillStyle = "black";
-                this.context.fillText(value, x, currentY + 4);
+                this. printLabel(x, currentY + 4, value, 'left');
             }
         }
+    }
+
+    p.clearDataArea = function(x, y, w, h){
+        this.context.clearRect(x, y, w, h);
     }
 
     p._drawDataArea = function(){
@@ -350,10 +441,66 @@ window.iChart = window.iChart || {};
 
     BarChart.prototype.parent = global.AxesChart.prototype;
 
-
     // override
     p._drawDataArea = function(){
+        // draw labels on x axis
+        var origin      = this.getOriginPoint(),
+            data        = this.getData(),
+            x           = origin.x,
+            y           = origin.y,
+            series      = this.getSeries(),
+            itemWidth   = global.Utils.calculateXAxisItemWidth(data.length, series.length, this.getXAxisLength() - this.getPaddingRight()),
+            labelX      = x,
+            labelY      = y + 15,
+            barX        = x,
+            labelGap    = (series.length * itemWidth)/ 2,
+            yAxisHeight = this.getYAxisLength(),
+            ratio       = yAxisHeight/this.getMaxScale(),
+            xField      = this.getXFields()[0];  // get the first xField
 
+        for(var i = 0; i < data.length; i++){
+            barX += itemWidth;
+            labelX = barX + labelGap - 5;
+            //draw label
+            this.printLabel(labelX, labelY, data[i][xField], 'middle');
+            for(var s = 0; s < series.length; s++){
+                var yField  = series[s].yField,
+                    value   = data[i][yField],
+                    height  = value*ratio,
+                    color   = series[s].fillColor,
+                    sColor  = series[s].strokeColor,
+                    barY    = y - value * ratio;
+
+                if(this.animated){
+                    this.animateBarDrawing(barX, barY, itemWidth, height, color, sColor);
+                }else{
+                    this.drawRect(barX, barY, itemWidth, height, color, sColor);
+                }
+
+                barX += itemWidth;
+            }
+
+        }
+    }
+
+    p.animateBarDrawing = function(x, y, width, height, color, sColor){
+        var totalTime   = 360,
+            frame       = 36,
+            count       = global.Utils.floor(totalTime/frame);
+
+        function drawPartBar(ctx, x, y, width, height, color, sColor, time) {
+            setTimeout(function() {
+                ctx.clearDataArea(x, y, width, height);
+                ctx.drawRect(x, y, width, height, color, sColor);
+            }, time);
+        }
+
+        var i = 0, h;
+        for(; i < count; i++){
+            h = i / count*height;
+            drawPartBar(this, x, (y + height) - h, width, h, color, sColor, i*frame);
+        }
+        drawPartBar(this, x, y, width, height, color, sColor, i*frame);
     }
 
     global.BarChart = BarChart;

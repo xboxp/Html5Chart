@@ -93,7 +93,9 @@ window.iChart = window.iChart || {};
         }
 
         this.headerHeight = 0;
-        this.legendHeight = 0;
+        this.legendHeight = 2*PADDING;
+
+        this.origin = {x:0, y:0};
 
         this.paddingRight = 2 * PADDING;
 
@@ -124,7 +126,7 @@ window.iChart = window.iChart || {};
             this.context.fillStyle = this.title.color;
             this.context.fillText(this.title.label, this.width/2, top);
 
-            this.headerHeight = top + global.Utils.calculateFontSize(this.context.font)/2;
+            this.headerHeight = top + global.Utils.calculateFontSize(this.context.font)/2 + PADDING;
         }
     }
 
@@ -145,6 +147,72 @@ window.iChart = window.iChart || {};
 
     p._createTooltip = function(){
 
+    }
+
+    p.getData = function(){
+        return this.parameters.dataProvider;
+    }
+
+    // layout related
+    p.getOriginPoint = function(){
+        return this.origin;
+    }
+
+    p.getXAxisLength = function(){
+        return this.xAxisLength;
+    }
+
+    p.getYAxisLength = function(){
+        return this.yAxisLength;
+    }
+
+    p.getFooterHeight = function(){
+        return this.legendHeight;
+    }
+
+    p.getDefaultPadding = function(){
+        return PADDING;
+    }
+
+    p.getPaddingRight = function(){
+        return this.paddingRight;
+    }
+
+    p.getSeries = function(){
+        return this.parameters.series;
+    }
+
+    p.getXFields = function(){
+        return global.Utils.getFields(this.getSeries(), 'xField');
+    }
+
+    p.getYFields = function(){
+        return global.Utils.getFields(this.getSeries(), 'yField');
+    }
+
+    p.getMaxScale = function(){
+        var max = 1;
+        if(this.yScales.length > 0){
+            max = this.yScales[this.yScales.length - 1];
+        }
+        return max;
+    }
+
+    p.printLabel = function(x, y, text, align){
+        this.context.font = '4px Arial';
+        this.context.textAlign = align;
+        this.context.fillStyle = "black";
+        this.context.fillText(text, x, y);
+    }
+
+    p.drawRect = function(x, y, width, height, color, strokeColor){
+        this.context.beginPath();
+        this.context.rect(x, y, width, height);
+        this.context.fillStyle = color;
+        this.context.fill();
+        this.context.lineWidth = 1;
+        this.context.strokeStyle = strokeColor;
+        this.context.stroke();
     }
 
     global.BaseChart = BaseChart;

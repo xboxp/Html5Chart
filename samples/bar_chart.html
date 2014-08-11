@@ -23,41 +23,51 @@
 </head>
 <body>
 <div class="wrapper">
-    <canvas id="iChartCanvas" class="container" width="1024px" height="768px"></canvas>
+    <canvas id="iChartCanvas" class="container" width="1024px" height="500px"></canvas>
     <script>
-        var data    = [{day:'1', r:3500, p:1123}, {day:'2', r:2500, p:813}, {day:'3', r:3000, p:1024}];
+        var data    = [
+            {day:'1',  h:28, l:19},
+            {day:'2',  h:29, l:21},
+            {day:'3',  h:31, l:22},
+            {day:'4',  h:28, l:22},
+            {day:'5',  h:32, l:23},
+            {day:'6',  h:35, l:24},
+            {day:'7',  h:36, l:28},
+            {day:'8',  h:32, l:22},
+            {day:'9',  h:30, l:19},
+            {day:'10', h:36, l:25},
+            {day:'11', h:37, l:27},
+            {day:'12', h:32, l:21}
+        ];
         var param   =  {
             dataProvider: data,
             animated:true,
             showTooltip: true,
             showLegend: true,
+            showGrid: false, // background grid
             title: {
-                label:'Apple Inc profit:July 2014',
+                label:'Temperature of Beijing in July ',
                 color:"#555",
                 font:"bold 15pt Segoe UI Light",
                 top:20
             },
             series: [{
                 xField: 'day',
-                yField: 'r',
-                fillColor: '#0f0',
-                strokeColor: '#00f',
-                fillAlpha: 1,
-                strokeAlpha: 1,
+                yField: 'h',
+                fillColor: '#34866f',
+                strokeColor: '#000',
                 legendLabel: 'Temperature'
             },
             {
                 xField: 'day',
-                yField: 'p',
-                fillColor: '#0f0',
-                strokeColor: '#00f',
-                fillAlpha: 1,
-                strokeAlpha: 1,
+                yField: 'l',
+                fillColor: '#0e2d66',
+                strokeColor: '#000',
                 legendLabel: 'Humidity'
             }],
             yAxis: {
                 labelFunction:  function(value) {
-                    return value > 0 ? (value/1000 + 'k'):value;
+                    return value;
                 }
             }
         };
