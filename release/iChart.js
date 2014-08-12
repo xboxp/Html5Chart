@@ -126,48 +126,9 @@ window.iChart = window.iChart || {};
 window.iChart = window.iChart || {};
 
 (function(global){
-
-    /**
-     param sample:
-     {
-        dataProvider: source,
-        animated:true,
-        showTooltip: true,
-        showLegend: true,
-        title: {
-            label: 'Temperature in Beijing: July 2014',
-            color: '#000',
-            font: "12px"
-        },
-        series: [{
-            xField: 'day',
-            yField: 't',
-            fillColor: '#0f0',
-            strokeColor: '#00f'
-            fillAlpha: 1,
-            strokeAlpha: 1
-        }],
-        yAxis: {
-            labelFunction:  function() {
-                return this.valueText + '&#176C';
-            }
-        }
-
-        xAxis: {
-            labelFunction: function() {
-                return 'Jul ' + this.valueText;
-            }
-        }
-     }
-
-     data sample:
-     [{day:'1', t:30}, {day:'2', t:31}, {day:'3', t:29}]
-     */
     var PADDING     = 5;  // default padding
-    var legendHeight = 10;
-    var legendWidth  = 20;
     var minWidth    = 100;
-    var minHeight   = 2 * PADDING + legendHeight;
+    var minHeight   = 6 * PADDING;
 
     var BaseChart = function(canvas, parameters){
         this.canvas = canvas;
@@ -175,7 +136,7 @@ window.iChart = window.iChart || {};
         this.width  = this.canvas.width;
         this.height = this.canvas.height;
 
-        this.parameters = parameters;
+        this._parameters = parameters;
     }
 
     var p = BaseChart.prototype;
@@ -188,20 +149,20 @@ window.iChart = window.iChart || {};
         var defaults = {animated:true, showTooltip:true, showLegend:true, showGrid:true,
             title:{label:'', color:'#000', font:"14px Segoe UI Light", top:PADDING}};
 
-        if(this.parameters == undefined || this.parameters == null){
+        if(this._parameters == undefined || this._parameters == null){
             console.error('Error: miss param ');
             return false;
         }
 
         for(var i = 0; i < mustHaveProperties.length; i++){
-            if(!this.parameters.hasOwnProperty(mustHaveProperties[i])){
+            if(!this._parameters.hasOwnProperty(mustHaveProperties[i])){
                 console.error('Error: miss param ' + mustHaveProperties[i]);
                 return false;
             }
         }
 
         for(var p in defaults){
-            this[p] = this.parameters[p] == undefined ? defaults[p] : this.parameters[p];
+            this[p] = this._parameters[p] == undefined ? defaults[p] : this._parameters[p];
             if(p == "title"){
                 for(var tp in defaults.title){
                     this.title[tp] = this.title[tp] == undefined ? defaults.title[tp] : this.title[tp];
@@ -214,12 +175,9 @@ window.iChart = window.iChart || {};
             return false;
         }
 
-        this.headerHeight = 0;
-        this.legendHeight = 2*PADDING;
-
-        this.origin = {x:0, y:0};
-
-        this.paddingRight = 2 * PADDING;
+        this._headerHeight = 0;
+        this._footerHeight = 2 * PADDING;
+        this._paddingRight = 2 * PADDING;
 
         return true;
     }
@@ -229,33 +187,29 @@ window.iChart = window.iChart || {};
      */
     p.drawChart = function(){
         if(this.initialize()){
-            this._drawTitle();
-            this._drawLegend();
-            this._draw(PADDING);
-            this._createTooltip();
+            this.drawTitle();
+            this.drawLegend();
+            this.draw();
+            this.createTooltip();
         }
     }
 
     /**
      * protected methods
      */
-    p._drawTitle = function(){
+    p.drawTitle = function(){
         if(this.title.label != ""){
             var top  = this.title.top;
 
-            this.context.font = this.title.font;
-            this.context.textAlign = 'center';
-            this.context.fillStyle = this.title.color;
-            this.context.fillText(this.title.label, this.width/2, top);
-
-            this.headerHeight = top + global.Utils.calculateFontSize(this.context.font)/2 + PADDING;
+            this.drawLabel(this.width/2, top, this.title.label, 'center');
+            this._headerHeight = top + global.Utils.calculateFontSize(this.context.font)/2 + PADDING;
         }
     }
 
-    p._drawLegend = function(){
+    p.drawLegend = function(){
         if(this.showLegend){
-            for(var i = 0; i < this.parameters.series; i++){
-                var s = this.parameters.series[i];
+            for(var i = 0; i < this._parameters.series; i++){
+                var s = this._parameters.series[i];
             }
         }
     }
@@ -263,65 +217,57 @@ window.iChart = window.iChart || {};
     /**
      * Abstract method, which need to be override by sub class
      */
-    p._draw = function(){
+    p.draw = function(){
         console.error("BaseChart should not be initialized directly. Use sub classes(BarChart, LineChart etc) instead.");
     }
 
-    p._createTooltip = function(){
+    p.createTooltip = function(){
 
+    }
+
+    /**
+     * getter
+     */
+    p.getParam = function(){
+        return this._parameters;
     }
 
     p.getData = function(){
-        return this.parameters.dataProvider;
+        return this._parameters.dataProvider;
+    }
+
+    p.getSeries = function(){
+        return this._parameters.series;
     }
 
     // layout related
-    p.getOriginPoint = function(){
-        return this.origin;
-    }
-
-    p.getXAxisLength = function(){
-        return this.xAxisLength;
-    }
-
-    p.getYAxisLength = function(){
-        return this.yAxisLength;
-    }
-
-    p.getFooterHeight = function(){
-        return this.legendHeight;
-    }
-
     p.getDefaultPadding = function(){
         return PADDING;
     }
 
     p.getPaddingRight = function(){
-        return this.paddingRight;
+        return this._paddingRight;
     }
 
-    p.getSeries = function(){
-        return this.parameters.series;
+    p.setHeaderHeight = function(newValue){
+        this._headerHeight = newValue;
     }
 
-    p.getXFields = function(){
-        return global.Utils.getFields(this.getSeries(), 'xField');
+    p.getHeaderHeight = function(){
+        return this._headerHeight;
     }
 
-    p.getYFields = function(){
-        return global.Utils.getFields(this.getSeries(), 'yField');
+    p.setFooterHeight = function(newValue){
+        this._footerHeight = newValue;
     }
 
-    p.getMaxScale = function(){
-        var max = 1;
-        if(this.yScales.length > 0){
-            max = this.yScales[this.yScales.length - 1];
-        }
-        return max;
+    p.getFooterHeight = function(){
+        return this._footerHeight;
     }
 
-    p.printLabel = function(x, y, text, align){
-        this.context.font = '4px Arial';
+    // drawing
+    p.drawLabel = function(x, y, text, align, font){
+        this.context.font = font == undefined ? '4px Arial': font;
         this.context.textAlign = align;
         this.context.fillStyle = "black";
         this.context.fillText(text, x, y);
@@ -337,6 +283,22 @@ window.iChart = window.iChart || {};
         this.context.stroke();
     }
 
+    p.drawLines = function(x, y, points, lineWidth, color){
+        this.context.strokeStyle= color;
+        this.context.lineWidth = lineWidth;
+        this.context.beginPath();
+        this.context.moveTo(x, y);
+        for(var i = 0; i < points.length; i++){
+            this.context.lineTo(points[i].x, points[i].y);
+        }
+        this.context.stroke();
+    }
+
+    p.calculateLabelWidth = function(text, font){
+        this.context.font = font == undefined ? '4px Arial':font;
+        return this.context.measureText(text);
+    }
+
     global.BaseChart = BaseChart;
 })(window.iChart);
 /**
@@ -348,6 +310,9 @@ window.iChart = window.iChart || {};
 
     var AxesChart = function(ctx, param){
         global.BaseChart.call(this, ctx, param);
+
+        this._labelWidth = 40;
+        this._labelHeight = 20;
     }
 
     var p = AxesChart.prototype = Object.create(global.BaseChart.prototype);
@@ -355,76 +320,113 @@ window.iChart = window.iChart || {};
     AxesChart.prototype.parent = global.BaseChart.prototype;
 
     // override
-    p._draw = function(padding){
-        this._drawAxes(padding);
-        this._drawDataArea();
+    p.draw = function(){
+        this.drawAxes();
+        this.drawDataArea();
     }
 
-    p._drawAxes = function(padding){
-        var x = padding,
-            y = this.headerHeight;
+    p.drawAxes = function(){
+        this._origin = {x:(this.getDefaultPadding() + this._labelWidth),
+            y:(this.height - this.getFooterHeight() - this._labelHeight)};
+        this.setXAxisLength(this.width - this.getPaddingRight() - this._origin.x);
+        this.setYAxisLength(this._origin.y - this.getHeaderHeight());
 
-        var data = this.getData(),
-            series = this.parameters.series,
-            max  = global.Utils.findMax(data, series),
-            scales = global.Utils.getScales(max);
-
-        this.yScales = scales;
-
-        var labelWidth = 40;
-        var labelHeight = 20;
-
-        this.origin = {x:(padding + labelWidth), y:(this.height - this.getFooterHeight() - labelHeight)};
-
-        var yAxisStartX = x + labelWidth;
-        var xAxisEndX = this.width - this.getPaddingRight();
-
-        this.yAxisLength = this.origin.y - y;
-        this.xAxisLength = xAxisEndX - this.origin.x;
+        var labelX = this.getDefaultPadding();
+            x = this._origin.x,
+            y = this.getHeaderHeight(),
+            scales = this.getScales(),
+            xAxisLength = this.getXAxisLength(),
+            yAxisLength = this.getYAxisLength(),
+            xAxisEndX = x + xAxisLength;
 
         // draw x and y axes
-        this.context.strokeStyle= LINE_COLOR;
-        this.context.lineWidth = "1";
+        var xyPoints = [];
+        xyPoints.push({x:x, y:this._origin.y});
+        xyPoints.push({x:xAxisEndX, y:this._origin.y});
 
-        this.context.beginPath();
-        this.context.moveTo(yAxisStartX, y);
-        this.context.lineTo(this.origin.x, this.origin.y);
-        this.context.lineTo(xAxisEndX, this.origin.y);
         if(this.showGrid){
-            this.context.lineTo(xAxisEndX, y);
-            this.context.lineTo(yAxisStartX, y);
+            xyPoints.push({x:xAxisEndX, y:y});
+            xyPoints.push({x:x, y:y});
         }
-        this.context.stroke();
+        this.drawLines(x, y, xyPoints, "1", LINE_COLOR);
 
         // draw scales
-        var yAxisLabelFun = this.parameters.yAxis == undefined ? undefined : this.parameters.yAxis.labelFunction;
+        var yAxisLabelFun = this.getYAxisLabelFunc();
         if(scales.length > 1){
-            var step = this.yAxisLength/(scales.length-1);
+            var step = yAxisLength/(scales.length-1);
             for(var i = 0; i < scales.length; i++){
-                var currentY = this.origin.y - step*i;
+                var currentY = this._origin.y - step*i;
                 var value = yAxisLabelFun == undefined ? scales[i] : yAxisLabelFun.call(null, scales[i]);
-                this.context.beginPath();
-                this.context.lineWidth = i%2 == 0 ? "2":"1";
-                this.context.strokeStyle="#e5e5e5";
-                this.context.moveTo(this.origin.x, currentY);
-                this.context.lineTo(this.origin.x - SCALE_LINE_WIDTH, currentY);
+                var lineWidth = i%2 == 0 ? "2":"1";
+                var points = [];
+                var lWidth = this.calculateLabelWidth(value);
+                console.log('label width is ' + lWidth)
+                points.push({x:this._origin.x - SCALE_LINE_WIDTH, y:currentY});
+                this.drawLines(this._origin.x, currentY, points, lineWidth, "#e5e5e5");
 
-                if(this.showGrid){
-                    this.context.lineTo(xAxisEndX, currentY);
-                }
-                this.context.stroke();
-
-                this. printLabel(x, currentY + 4, value, 'left');
+                this.drawLabel(labelX + lWidth/2, currentY + 4, value, 'left');
             }
         }
     }
 
-    p.clearDataArea = function(x, y, w, h){
+    p.clearRect = function(x, y, w, h){
         this.context.clearRect(x, y, w, h);
     }
 
-    p._drawDataArea = function(){
+    p.drawDataArea = function(){
         console.error("AxesChart should not be initialized directly. Use sub classes(BarChart, LineChart etc) instead.");
+    }
+
+    //layout
+    p.getOriginPoint = function(){
+        return this._origin;
+    }
+
+    p.setXAxisLength = function(v){
+        this.xAxisLength = v;
+    }
+
+    p.getXAxisLength = function(){
+        return this.xAxisLength;
+    }
+
+    p.setYAxisLength = function(v){
+        this.yAxisLength = v;
+    }
+
+    p.getYAxisLength = function(){
+        return this.yAxisLength;
+    }
+
+    // helper
+    p.getMax = function(){
+        return global.Utils.findMax(this.getData(), this.getSeries());
+    }
+
+    p.getScales = function(){
+        return global.Utils.getScales(this.getMax());
+    }
+
+    p.getMaxScale = function(){
+        var max = 1;
+        var scales = this.getScales();
+        if(scales.length > 0){
+            max = scales[scales.length - 1];
+        }
+        return max;
+    }
+
+    p.getXFields = function(){
+        return global.Utils.getFields(this.getSeries(), 'xField');
+    }
+
+    p.getYFields = function(){
+        return global.Utils.getFields(this.getSeries(), 'yField');
+    }
+
+    p.getYAxisLabelFunc = function(){
+        var param = this.getParam();
+        return param.yAxis == undefined ? undefined : param.yAxis.labelFunction;
     }
 
     global.AxesChart = AxesChart;
@@ -442,7 +444,7 @@ window.iChart = window.iChart || {};
     BarChart.prototype.parent = global.AxesChart.prototype;
 
     // override
-    p._drawDataArea = function(){
+    p.drawDataArea = function(){
         // draw labels on x axis
         var origin      = this.getOriginPoint(),
             data        = this.getData(),
@@ -462,7 +464,7 @@ window.iChart = window.iChart || {};
             barX += itemWidth;
             labelX = barX + labelGap - 5;
             //draw label
-            this.printLabel(labelX, labelY, data[i][xField], 'middle');
+            this.drawLabel(labelX, labelY, data[i][xField], 'middle');
             for(var s = 0; s < series.length; s++){
                 var yField  = series[s].yField,
                     value   = data[i][yField],
@@ -479,7 +481,6 @@ window.iChart = window.iChart || {};
 
                 barX += itemWidth;
             }
-
         }
     }
 
@@ -490,7 +491,7 @@ window.iChart = window.iChart || {};
 
         function drawPartBar(ctx, x, y, width, height, color, sColor, time) {
             setTimeout(function() {
-                ctx.clearDataArea(x, y, width, height);
+                ctx.clearRect(x, y, width, height);
                 ctx.drawRect(x, y, width, height, color, sColor);
             }, time);
         }

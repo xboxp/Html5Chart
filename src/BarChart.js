@@ -11,7 +11,7 @@
     BarChart.prototype.parent = global.AxesChart.prototype;
 
     // override
-    p._drawDataArea = function(){
+    p.drawDataArea = function(){
         // draw labels on x axis
         var origin      = this.getOriginPoint(),
             data        = this.getData(),
@@ -31,7 +31,7 @@
             barX += itemWidth;
             labelX = barX + labelGap - 5;
             //draw label
-            this.printLabel(labelX, labelY, data[i][xField], 'middle');
+            this.drawLabel(labelX, labelY, data[i][xField], 'middle');
             for(var s = 0; s < series.length; s++){
                 var yField  = series[s].yField,
                     value   = data[i][yField],
@@ -58,7 +58,7 @@
 
         function drawPartBar(ctx, x, y, width, height, color, sColor, time) {
             setTimeout(function() {
-                ctx.clearDataArea(x, y, width, height);
+                ctx.clearRect(x, y, width, height);
                 ctx.drawRect(x, y, width, height, color, sColor);
             }, time);
         }
