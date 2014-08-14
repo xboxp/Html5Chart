@@ -138,7 +138,9 @@ window.iChart = window.iChart || {};
         minWidth    = 100,
         minHeight   = 6 * PADDING,
         DEFAULT_TITLE_FONT = "14px Segoe UI Light",
-        DEFAULT_FONT = "4px Arial";
+        DEFAULT_FONT = "4px Arial",
+        LEGEND_ICON_WIDTH = 30,
+        LEGEND_ICON_HEIGHT = 10;
 
     var BaseChart = function(canvas, parameters){
         this.canvas = canvas;
@@ -218,24 +220,20 @@ window.iChart = window.iChart || {};
 
     p.drawLegend = function(){
         var legendWidth = 0,
-            legendRectWidth = 30,
-            legendHeight = 20,
             x = PADDING,
-            y = this.height - legendHeight - PADDING,
+            y = this.height - LEGEND_ICON_HEIGHT - PADDING,
             series = this.getSeries();
         if(this.showLegend){
-            this.setFooterHeight(legendHeight + 2*PADDING);
+            this.setFooterHeight(LEGEND_ICON_HEIGHT + 2*PADDING);
             for(var i = 0; i < series.length; i++){
                 var s = series[i],
                     label = s.label ? s.label: s.yField;
 
                 x = x + legendWidth;
+                legendWidth = LEGEND_ICON_WIDTH + 2*PADDING + this.calculateLabelWidth(label);
 
-                legendWidth = legendRectWidth + 2*PADDING + this.calculateLabelWidth(label);
-
-
-                this.drawRect(x, y, legendRectWidth, legendHeight, s.fillColor, s.strokeColor);
-                this.drawLabel(x + legendRectWidth + PADDING, y + 12, label, 'left');
+                this.drawRect(x, y, LEGEND_ICON_WIDTH, LEGEND_ICON_HEIGHT, s.fillColor, s.strokeColor);
+                this.drawLabel(x + LEGEND_ICON_WIDTH + PADDING, y + LEGEND_ICON_HEIGHT, label, 'left');
             }
         }
     };
