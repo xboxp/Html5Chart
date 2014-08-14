@@ -8,7 +8,7 @@ window.iChart = window.iChart || {};
 
     var Utils = {
         calculateFontSize : function(font){
-            if(font && font != ''){
+            if(font && font !== ''){
                 var fields = font.split(" ");
                 for(var i = 0; i < fields.length; i++){
                     if(fields[i].indexOf("px") > 0){
@@ -33,13 +33,13 @@ window.iChart = window.iChart || {};
             return this.max(maxes, undefined, minimum);
         },
 
-        max : function(array, field, minimum) {
+        max : function(array, field, findMinimum) {
             var max = null;
             if(array && array.length > 0){
-                max = field == undefined ? array[0] : array[0][field];
+                max = field === undefined ? array[0] : array[0][field];
                 for(var i = 1; i < array.length; i++){
-                    var item = field == undefined ? array[i] : array[i][field];
-                    if(minimum != undefined && minimum == true){
+                    var item = field === undefined ? array[i] : array[i][field];
+                    if(findMinimum !== undefined && findMinimum === true){
                         if(item < max){
                             max = item;
                         }
@@ -85,14 +85,14 @@ window.iChart = window.iChart || {};
             }else{
                 if(max > Math.pow(10, scale) * DISPLAY_RATIO){
                     step = Math.pow(10, scale-1);
-                    for(var i = 1; i <= defaultLength; i++){
-                        scales.push(step*i);
+                    for(var j = 1; j <= defaultLength; j++){
+                        scales.push(step*j);
                     }
                 }else{
                     step = Math.pow(10, scale-1)/2;
                     var count = max/step;
-                    for(var i = 1; i <= (count + 2); i++){
-                        scales.push(step*i);
+                    for(var k = 1; k <= (count + 2); k++){
+                        scales.push(step*k);
                     }
                 }
             }
@@ -115,6 +115,13 @@ window.iChart = window.iChart || {};
         floor : function(floatNumber){
             var parts = floatNumber.toString().split('.');
             return parseInt(parts[0]);
+        },
+
+        mouseIn : function(x, y, rectX, rectY, rectWidth, rectHeight){
+            if(x > rectX && x < (rectX+rectWidth) && y > rectY && y < (rectY + rectHeight)){
+                return true;
+            }
+            return false;
         }
     };
 

@@ -21,13 +21,19 @@ module.exports = function(grunt) {
 
         qunit: {
             all: ['test/*.html']
+        },
+
+        jshint: {
+            all: ['src/*.js']
         }
     });
 
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-qunit');
+    grunt.loadNpmTasks('grunt-contrib-jshint');
 
     grunt.registerTask('default', ['concat', 'uglify']);
     grunt.registerTask('test', ['concat', 'qunit']);
+    grunt.registerTask('hint', ['jshint']);
 }

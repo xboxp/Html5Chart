@@ -8,7 +8,7 @@ window.iChart = window.iChart || {};
 
     var Utils = {
         calculateFontSize : function(font){
-            if(font && font != ''){
+            if(font && font !== ''){
                 var fields = font.split(" ");
                 for(var i = 0; i < fields.length; i++){
                     if(fields[i].indexOf("px") > 0){
@@ -33,13 +33,13 @@ window.iChart = window.iChart || {};
             return this.max(maxes, undefined, minimum);
         },
 
-        max : function(array, field, minimum) {
+        max : function(array, field, findMinimum) {
             var max = null;
             if(array && array.length > 0){
-                max = field == undefined ? array[0] : array[0][field];
+                max = field === undefined ? array[0] : array[0][field];
                 for(var i = 1; i < array.length; i++){
-                    var item = field == undefined ? array[i] : array[i][field];
-                    if(minimum != undefined && minimum == true){
+                    var item = field === undefined ? array[i] : array[i][field];
+                    if(findMinimum !== undefined && findMinimum === true){
                         if(item < max){
                             max = item;
                         }
@@ -85,14 +85,14 @@ window.iChart = window.iChart || {};
             }else{
                 if(max > Math.pow(10, scale) * DISPLAY_RATIO){
                     step = Math.pow(10, scale-1);
-                    for(var i = 1; i <= defaultLength; i++){
-                        scales.push(step*i);
+                    for(var j = 1; j <= defaultLength; j++){
+                        scales.push(step*j);
                     }
                 }else{
                     step = Math.pow(10, scale-1)/2;
                     var count = max/step;
-                    for(var i = 1; i <= (count + 2); i++){
-                        scales.push(step*i);
+                    for(var k = 1; k <= (count + 2); k++){
+                        scales.push(step*k);
                     }
                 }
             }
@@ -115,6 +115,13 @@ window.iChart = window.iChart || {};
         floor : function(floatNumber){
             var parts = floatNumber.toString().split('.');
             return parseInt(parts[0]);
+        },
+
+        mouseIn : function(x, y, rectX, rectY, rectWidth, rectHeight){
+            if(x > rectX && x < (rectX+rectWidth) && y > rectY && y < (rectY + rectHeight)){
+                return true;
+            }
+            return false;
         }
     };
 
@@ -126,9 +133,12 @@ window.iChart = window.iChart || {};
 window.iChart = window.iChart || {};
 
 (function(global){
-    var PADDING     = 5;  // default padding
-    var minWidth    = 100;
-    var minHeight   = 6 * PADDING;
+    var PADDING     = 5,  // default padding
+        TOOLTIP_H   = 13,
+        minWidth    = 100,
+        minHeight   = 6 * PADDING,
+        DEFAULT_TITLE_FONT = "14px Segoe UI Light",
+        DEFAULT_FONT = "4px Arial";
 
     var BaseChart = function(canvas, parameters){
         this.canvas = canvas;
@@ -137,7 +147,7 @@ window.iChart = window.iChart || {};
         this.height = this.canvas.height;
 
         this._parameters = parameters;
-    }
+    };
 
     var p = BaseChart.prototype;
 
@@ -147,9 +157,9 @@ window.iChart = window.iChart || {};
     p.initialize = function(){
         var mustHaveProperties = ['dataProvider', 'series'];
         var defaults = {animated:true, showTooltip:true, showLegend:true, showGrid:true,
-            title:{label:'', color:'#000', font:"14px Segoe UI Light", top:PADDING}};
+            title:{label:'', color:'#000', font:DEFAULT_TITLE_FONT, top:PADDING}};
 
-        if(this._parameters == undefined || this._parameters == null){
+        if(this._parameters === undefined || this._parameters === null){
             console.error('Error: miss param ');
             return false;
         }
@@ -162,10 +172,10 @@ window.iChart = window.iChart || {};
         }
 
         for(var p in defaults){
-            this[p] = this._parameters[p] == undefined ? defaults[p] : this._parameters[p];
+            this[p] = this._parameters[p] === undefined ? defaults[p] : this._parameters[p];
             if(p == "title"){
                 for(var tp in defaults.title){
-                    this.title[tp] = this.title[tp] == undefined ? defaults.title[tp] : this.title[tp];
+                    this.title[tp] = this.title[tp] === undefined ? defaults.title[tp] : this.title[tp];
                 }
             }
         }
@@ -180,7 +190,7 @@ window.iChart = window.iChart || {};
         this._paddingRight = 2 * PADDING;
 
         return true;
-    }
+    };
 
     /**
      * public methods to user
@@ -189,99 +199,144 @@ window.iChart = window.iChart || {};
         if(this.initialize()){
             this.drawTitle();
             this.drawLegend();
-            this.draw();
             this.createTooltip();
+            this.draw();
         }
-    }
+    };
 
     /**
      * protected methods
      */
     p.drawTitle = function(){
-        if(this.title.label != ""){
+        if(this.title.label !== ""){
             var top  = this.title.top;
 
-            this.drawLabel(this.width/2, top, this.title.label, 'center');
+            this.drawLabel(this.width/2, top, this.title.label, 'center', this.title.font);
             this._headerHeight = top + global.Utils.calculateFontSize(this.context.font)/2 + PADDING;
         }
-    }
+    };
 
     p.drawLegend = function(){
+        var legendWidth = 0,
+            legendRectWidth = 30,
+            legendHeight = 20,
+            x = PADDING,
+            y = this.height - legendHeight - PADDING,
+            series = this.getSeries();
         if(this.showLegend){
-            for(var i = 0; i < this._parameters.series; i++){
-                var s = this._parameters.series[i];
+            this.setFooterHeight(legendHeight + 2*PADDING);
+            for(var i = 0; i < series.length; i++){
+                var s = series[i],
+                    label = s.label ? s.label: s.yField;
+
+                x = x + legendWidth;
+
+                legendWidth = legendRectWidth + 2*PADDING + this.calculateLabelWidth(label);
+
+
+                this.drawRect(x, y, legendRectWidth, legendHeight, s.fillColor, s.strokeColor);
+                this.drawLabel(x + legendRectWidth + PADDING, y + 12, label, 'left');
             }
         }
-    }
+    };
 
     /**
      * Abstract method, which need to be override by sub class
      */
     p.draw = function(){
         console.error("BaseChart should not be initialized directly. Use sub classes(BarChart, LineChart etc) instead.");
-    }
+    };
 
+    /**
+     * tooltip
+     */
     p.createTooltip = function(){
+        this._tipCanvas = document.createElement('canvas');
+        this._tipCanvas.width = 100;
+        this._tipCanvas.height = TOOLTIP_H;
+        this._tipCanvas.style.position = "absolute";
+        if (this.canvas.nextSibling) {
+            this.canvas.parentNode.insertBefore(this._tipCanvas, this.canvas.nextSibling);
+        }
+        else {
+            this.canvas.parentNode.appendChild(this._tipCanvas);
+        }
+    };
 
-    }
+    p.getTooltip = function(){
+        return this._tipCanvas;
+    };
+
+    p.hideTooltip = function(){
+        this._tipCanvas.style.left = "-" + (this._tipCanvas.width + 100) + "px";
+    };
 
     /**
      * getter
      */
     p.getParam = function(){
         return this._parameters;
-    }
+    };
 
     p.getData = function(){
         return this._parameters.dataProvider;
-    }
+    };
 
     p.getSeries = function(){
         return this._parameters.series;
-    }
+    };
 
     // layout related
     p.getDefaultPadding = function(){
         return PADDING;
-    }
+    };
 
     p.getPaddingRight = function(){
         return this._paddingRight;
-    }
+    };
 
     p.setHeaderHeight = function(newValue){
         this._headerHeight = newValue;
-    }
+    };
 
     p.getHeaderHeight = function(){
         return this._headerHeight;
-    }
+    };
 
     p.setFooterHeight = function(newValue){
         this._footerHeight = newValue;
-    }
+    };
 
     p.getFooterHeight = function(){
         return this._footerHeight;
-    }
+    };
+
+    p.getTooltipDefaultHeight = function(){
+        return TOOLTIP_H;
+    };
+
+    p.calculateLabelWidth = function(text, font){
+        this.context.font = font === undefined ? DEFAULT_FONT:font;
+        return this.context.measureText(text).width;
+    };
 
     // drawing
     p.drawLabel = function(x, y, text, align, font){
-        this.context.font = font == undefined ? '4px Arial': font;
+        this.context.font = font === undefined ? DEFAULT_FONT: font;
         this.context.textAlign = align;
         this.context.fillStyle = "black";
         this.context.fillText(text, x, y);
-    }
+    };
 
     p.drawRect = function(x, y, width, height, color, strokeColor){
         this.context.beginPath();
         this.context.rect(x, y, width, height);
-        this.context.fillStyle = color;
+        this.context.fillStyle = color ? color : '#0099ff';
         this.context.fill();
         this.context.lineWidth = 1;
         this.context.strokeStyle = strokeColor;
         this.context.stroke();
-    }
+    };
 
     p.drawLines = function(x, y, points, lineWidth, color){
         this.context.strokeStyle= color;
@@ -292,12 +347,7 @@ window.iChart = window.iChart || {};
             this.context.lineTo(points[i].x, points[i].y);
         }
         this.context.stroke();
-    }
-
-    p.calculateLabelWidth = function(text, font){
-        this.context.font = font == undefined ? '4px Arial':font;
-        return this.context.measureText(text);
-    }
+    };
 
     global.BaseChart = BaseChart;
 })(window.iChart);
@@ -305,25 +355,23 @@ window.iChart = window.iChart || {};
  * Created by David Zhang on 2014/8/8.
  */
 (function(global){
-    var SCALE_LINE_WIDTH = 6;
-    var LINE_COLOR = "gray";
+    var SCALE_WIDTH = 6;
+    var LINE_COLOR  = "gray";
 
     var AxesChart = function(ctx, param){
         global.BaseChart.call(this, ctx, param);
 
         this._labelWidth = 40;
         this._labelHeight = 20;
-    }
+    };
 
     var p = AxesChart.prototype = Object.create(global.BaseChart.prototype);
-
-    AxesChart.prototype.parent = global.BaseChart.prototype;
 
     // override
     p.draw = function(){
         this.drawAxes();
         this.drawDataArea();
-    }
+    };
 
     p.drawAxes = function(){
         this._origin = {x:(this.getDefaultPadding() + this._labelWidth),
@@ -331,7 +379,7 @@ window.iChart = window.iChart || {};
         this.setXAxisLength(this.width - this.getPaddingRight() - this._origin.x);
         this.setYAxisLength(this._origin.y - this.getHeaderHeight());
 
-        var labelX = this.getDefaultPadding();
+        var labelX = this.getDefaultPadding(),
             x = this._origin.x,
             y = this.getHeaderHeight(),
             scales = this.getScales(),
@@ -356,56 +404,55 @@ window.iChart = window.iChart || {};
             var step = yAxisLength/(scales.length-1);
             for(var i = 0; i < scales.length; i++){
                 var currentY = this._origin.y - step*i;
-                var value = yAxisLabelFun == undefined ? scales[i] : yAxisLabelFun.call(null, scales[i]);
-                var lineWidth = i%2 == 0 ? "2":"1";
+                var value = yAxisLabelFun === undefined ? scales[i] : yAxisLabelFun.call(null, scales[i]);
+                var lineWidth = i%2 === 0 ? "2":"1";
                 var points = [];
                 var lWidth = this.calculateLabelWidth(value);
-                console.log('label width is ' + lWidth)
-                points.push({x:this._origin.x - SCALE_LINE_WIDTH, y:currentY});
+                points.push({x:this._origin.x - SCALE_WIDTH, y:currentY});
                 this.drawLines(this._origin.x, currentY, points, lineWidth, "#e5e5e5");
 
-                this.drawLabel(labelX + lWidth/2, currentY + 4, value, 'left');
+                this.drawLabel(labelX + (this._labelWidth - (lWidth + SCALE_WIDTH)), currentY + 4, value, 'left');
             }
         }
-    }
+    };
 
     p.clearRect = function(x, y, w, h){
         this.context.clearRect(x, y, w, h);
-    }
+    };
 
     p.drawDataArea = function(){
         console.error("AxesChart should not be initialized directly. Use sub classes(BarChart, LineChart etc) instead.");
-    }
+    };
 
     //layout
     p.getOriginPoint = function(){
         return this._origin;
-    }
+    };
 
     p.setXAxisLength = function(v){
         this.xAxisLength = v;
-    }
+    };
 
     p.getXAxisLength = function(){
         return this.xAxisLength;
-    }
+    };
 
     p.setYAxisLength = function(v){
         this.yAxisLength = v;
-    }
+    };
 
     p.getYAxisLength = function(){
         return this.yAxisLength;
-    }
+    };
 
     // helper
     p.getMax = function(){
         return global.Utils.findMax(this.getData(), this.getSeries());
-    }
+    };
 
     p.getScales = function(){
         return global.Utils.getScales(this.getMax());
-    }
+    };
 
     p.getMaxScale = function(){
         var max = 1;
@@ -414,20 +461,20 @@ window.iChart = window.iChart || {};
             max = scales[scales.length - 1];
         }
         return max;
-    }
+    };
 
     p.getXFields = function(){
         return global.Utils.getFields(this.getSeries(), 'xField');
-    }
+    };
 
     p.getYFields = function(){
         return global.Utils.getFields(this.getSeries(), 'yField');
-    }
+    };
 
     p.getYAxisLabelFunc = function(){
         var param = this.getParam();
-        return param.yAxis == undefined ? undefined : param.yAxis.labelFunction;
-    }
+        return param.yAxis === undefined ? undefined : param.yAxis.labelFunction;
+    };
 
     global.AxesChart = AxesChart;
 })(window.iChart);
@@ -435,13 +482,16 @@ window.iChart = window.iChart || {};
  * Created by David Zhang on 2014/8/6.
  */
 (function(global){
+    var TOOLTIP_FONT = "10px Arial";
+
     var BarChart = function(ctx, param){
         global.AxesChart.call(this, ctx, param);
-    }
+
+        this._dataArea = [];
+
+    };
 
     var p = BarChart.prototype = Object.create(global.AxesChart.prototype);
-
-    BarChart.prototype.parent = global.AxesChart.prototype;
 
     // override
     p.drawDataArea = function(){
@@ -451,20 +501,23 @@ window.iChart = window.iChart || {};
             x           = origin.x,
             y           = origin.y,
             series      = this.getSeries(),
-            itemWidth   = global.Utils.calculateXAxisItemWidth(data.length, series.length, this.getXAxisLength() - this.getPaddingRight()),
+            itemWidth   = this.getBarWidth(data, series),
             labelX      = x,
             labelY      = y + 15,
             barX        = x,
-            labelGap    = (series.length * itemWidth)/ 2,
-            yAxisHeight = this.getYAxisLength(),
-            ratio       = yAxisHeight/this.getMaxScale(),
+            labelPadding= (series.length * itemWidth)/ 2,
+            xAxisLength = this.getXAxisLength(),
+            yAxisLength = this.getYAxisLength(),
+            ratio       = yAxisLength/this.getMaxScale(),
             xField      = this.getXFields()[0];  // get the first xField
 
         for(var i = 0; i < data.length; i++){
+            var label = data[i][xField];
             barX += itemWidth;
-            labelX = barX + labelGap - 5;
+            labelX = barX + labelPadding - this.calculateLabelWidth(label)/2;
             //draw label
-            this.drawLabel(labelX, labelY, data[i][xField], 'middle');
+            this.drawLabel(labelX, labelY, label, 'middle');
+            this._dataArea.push(barX);
             for(var s = 0; s < series.length; s++){
                 var yField  = series[s].yField,
                     value   = data[i][yField],
@@ -482,7 +535,61 @@ window.iChart = window.iChart || {};
                 barX += itemWidth;
             }
         }
-    }
+
+        if(this.showTooltip){
+            var that = this,
+                seriesNum = series.length,
+                rect = this.canvas.getBoundingClientRect(),
+                tipCanvas = this.getTooltip(),
+                tipCtx = tipCanvas.getContext('2d'),
+                tipHeight = series.length*(this.getTooltipDefaultHeight() + 2),
+                tipWidth  = this.getMaxLabelWidth(this.getMax(), series, TOOLTIP_FONT);
+            this.canvas.onmousemove = function onMouseOver(e) {
+                var mx = e.clientX - rect.left;
+                var my = e.clientY - rect.top;
+
+                var showTip = false;
+                if(that.mouseIn(mx, my, origin.x, origin.y - yAxisLength, xAxisLength, yAxisLength)){
+                    for(var i = 0; i < that._dataArea.length; i++){
+                        if(that.mouseIn(mx, my, that._dataArea[i], origin.y - yAxisLength, seriesNum*itemWidth, yAxisLength)){
+                            tipCanvas.height = tipHeight;
+                            tipCanvas.width  = tipWidth + that.getDefaultPadding();
+                            tipCanvas.style.left = mx + "px";
+                            tipCanvas.style.top  = my-tipHeight + "px";
+                            that.customizeTooltip(tipCtx, data[i], series, tipCanvas.width, tipCanvas.height);
+                            showTip = true;
+                        }
+                    }
+                }
+                if(!showTip){
+                    that.hideTooltip();
+                }
+            };
+        }
+    };
+
+    p.customizeTooltip = function(tipCtx, data, series, width, height){
+        tipCtx.clearRect(0, 0, width, height);
+        tipCtx.beginPath();
+        tipCtx.rect(0, 0, width, height);
+        tipCtx.fillStyle = "white";
+        tipCtx.fill();
+        tipCtx.lineWidth = 1;
+        tipCtx.strokeStyle = "gray";
+        tipCtx.stroke();
+        tipCtx.font = TOOLTIP_FONT;
+        tipCtx.fillStyle = "black";
+        tipCtx.textAlign = 'left';
+        for(var i = 0; i < series.length; i++){
+            var yField = series[i].yField,
+                yFieldLabel = series[i].label === undefined ? yField : series[i].label;
+            tipCtx.fillText(this.tooltipLabelFunc(yFieldLabel, data[yField], this.getYAxisLabelFunc()), 2, this.getTooltipDefaultHeight()*(i+1));
+        }
+    };
+
+    p.mouseIn = function(x, y, rectX, rectY, rectWidth, rectHeight){
+        return global.Utils.mouseIn(x, y, rectX, rectY, rectWidth, rectHeight);
+    };
 
     p.animateBarDrawing = function(x, y, width, height, color, sColor){
         var totalTime   = 360,
@@ -502,7 +609,26 @@ window.iChart = window.iChart || {};
             drawPartBar(this, x, (y + height) - h, width, h, color, sColor, i*frame);
         }
         drawPartBar(this, x, y, width, height, color, sColor, i*frame);
-    }
+    };
+
+    p.getBarWidth = function(data, series){
+        return global.Utils.calculateXAxisItemWidth(data.length, series.length, this.getXAxisLength() - this.getPaddingRight());
+    };
+
+    p.getMaxLabelWidth = function(max, series){
+        var widthArray = [];
+        for(var i = 0; i < series.length; i++){
+            widthArray.push({width:this.calculateLabelWidth(this.tooltipLabelFunc(series[i].label, max, this.getYAxisLabelFunc()), TOOLTIP_FONT)});
+        }
+        return global.Utils.max(widthArray, 'width');
+    };
+
+    p.tooltipLabelFunc = function(label, value, labelFunc){
+        if(labelFunc){
+            value = labelFunc.call(null, value);
+        }
+        return label + ":" + value;
+    };
 
     global.BarChart = BarChart;
 })(window.iChart);
