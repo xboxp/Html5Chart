@@ -1,10 +1,10 @@
 {
-  "name": "iChart",
-  "version": "0.1.0",
+  "name": "zChart",
+  "version": "0.2.0",
   "description": "An html5 chart library.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/zhgway/iChart"
+    "url": "https://github.com/zhgway/Html5Chart"
   },
   "keywords": [
     "html5",
@@ -14,9 +14,9 @@
   "author": "David Zhang",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/zhgway/iChart/issues"
+    "url": "https://github.com/zhgway/Html5Chart/issues"
   },
-  "homepage": "https://github.com/zhgway/iChart",
+  "homepage": "https://github.com/zhgway/Html5Chart",
   "devDependencies": {
     "grunt": "^0.4.5",
     "grunt-contrib-concat": "^0.5.0",

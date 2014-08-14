@@ -1,7 +1,7 @@
 /**
  * Created by David Zhang on 2014/8/7.
  */
-window.iChart = window.iChart || {};
+window.zChart = window.zChart || {};
 
 (function(global){
     var DISPLAY_RATIO = 0.618;
@@ -126,4 +126,4 @@ window.iChart = window.iChart || {};
     };
 
     global.Utils = Utils;
-})(window.iChart);
+})(window.zChart);

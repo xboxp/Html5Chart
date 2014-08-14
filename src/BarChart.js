@@ -151,4 +151,4 @@
     };
 
     global.BarChart = BarChart;
-})(window.iChart);
+})(window.zChart);

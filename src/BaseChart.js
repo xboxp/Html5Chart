@@ -1,7 +1,7 @@
 /**
  * Created by David Zhang on 2014/8/6.
  */
-window.iChart = window.iChart || {};
+window.zChart = window.zChart || {};
 
 (function(global){
     var PADDING     = 5,  // default padding
@@ -54,7 +54,7 @@ window.iChart = window.iChart || {};
         }
 
         if(this.width < minWidth || this.height < minHeight){
-            console.error('Canvas is too small for iChart(minWidth:' + minWidth + ", minHeight:" + minHeight);
+            console.error('Canvas is too small for zChart(minWidth:' + minWidth + ", minHeight:" + minHeight);
             return false;
         }
 
@@ -219,4 +219,4 @@ window.iChart = window.iChart || {};
     };
 
     global.BaseChart = BaseChart;
-})(window.iChart);
+})(window.zChart);

@@ -124,4 +124,4 @@
     };
 
     global.AxesChart = AxesChart;
-})(window.iChart);
+})(window.zChart);

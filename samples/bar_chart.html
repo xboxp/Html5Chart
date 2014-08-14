@@ -2,7 +2,7 @@
 <html>
 <head lang="en">
     <meta charset="UTF-8">
-    <title>iChart Sample</title>
+    <title>zChart Sample</title>
     <style type="text/css">
         body{
             background-color: black;
@@ -23,12 +23,12 @@
             background-color: white;
         }
     </style>
-    <script type="text/javascript" src="../release/iChart.js"></script>
+    <script type="text/javascript" src="../release/zChart.js"></script>
 </head>
 <body>
 <div>
     <div class="wrapper">
-        <canvas id="iChartCanvas" class="container" width="1024px" height="500px"></canvas>
+        <canvas id="zChartCanvas" class="container" width="1024px" height="500px"></canvas>
     </div>
     <script>
         var data    = [
@@ -78,8 +78,8 @@
             }
         };
 
-        var canvas = document.getElementById("iChartCanvas");
-        var chart = new iChart.BarChart(canvas, param);
+        var canvas = document.getElementById("zChartCanvas");
+        var chart = new zChart.BarChart(canvas, param);
         chart.drawChart();
     </script>
 </div>
