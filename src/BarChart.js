@@ -2,7 +2,7 @@
  * Created by David Zhang on 2014/8/6.
  */
 (function(global){
-    var TOOLTIP_FONT = "10px Arial";
+    var TOOLTIP_FONT = "10px Segoe UI Light";
 
     var BarChart = function(ctx, param){
         global.AxesChart.call(this, ctx, param);

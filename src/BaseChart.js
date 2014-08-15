@@ -9,7 +9,7 @@ window.zChart = window.zChart || {};
         minWidth    = 100,
         minHeight   = 6 * PADDING,
         DEFAULT_TITLE_FONT = "14px Segoe UI Light",
-        DEFAULT_FONT = "4px Arial",
+        DEFAULT_FONT = "4px Segoe UI Light",
         LEGEND_ICON_WIDTH = 30,
         LEGEND_ICON_HEIGHT = 10;
 
@@ -92,7 +92,7 @@ window.zChart = window.zChart || {};
 
     p.drawLegend = function(){
         var legendWidth = 0,
-            x = PADDING,
+            x = 0.5*this.width,
             y = this.height - LEGEND_ICON_HEIGHT - this._paddingBottom,
             series = this.getSeries();
         if(this.showLegend){
