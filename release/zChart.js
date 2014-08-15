@@ -138,7 +138,7 @@ window.zChart = window.zChart || {};
         minWidth    = 100,
         minHeight   = 6 * PADDING,
         DEFAULT_TITLE_FONT = "14px Segoe UI Light",
-        DEFAULT_FONT = "4px Segoe UI Light",
+        DEFAULT_FONT = "12px Segoe UI Light",
         LEGEND_ICON_WIDTH = 30,
         LEGEND_ICON_HEIGHT = 10;
 
