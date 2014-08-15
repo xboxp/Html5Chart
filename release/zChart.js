@@ -190,6 +190,7 @@ window.zChart = window.zChart || {};
         this._headerHeight = 0;
         this._footerHeight = 2 * PADDING;
         this._paddingRight = 2 * PADDING;
+        this._paddingBottom = 2 * PADDING;
 
         return true;
     };
@@ -221,10 +222,10 @@ window.zChart = window.zChart || {};
     p.drawLegend = function(){
         var legendWidth = 0,
             x = PADDING,
-            y = this.height - LEGEND_ICON_HEIGHT - PADDING,
+            y = this.height - LEGEND_ICON_HEIGHT - this._paddingBottom,
             series = this.getSeries();
         if(this.showLegend){
-            this.setFooterHeight(LEGEND_ICON_HEIGHT + 2*PADDING);
+            this.setFooterHeight(LEGEND_ICON_HEIGHT + 2*this._paddingBottom);
             for(var i = 0; i < series.length; i++){
                 var s = series[i],
                     label = s.label ? s.label: s.yField;
@@ -238,6 +239,19 @@ window.zChart = window.zChart || {};
         }
     };
 
+    p.setParameter = function(newParam){
+        this._parameters = newParam;
+    };
+
+    p.reload = function(){
+        this.clearRect(0, 0, this.width, this.height);
+        this.drawChart();
+    };
+
+    p.clearRect = function(x, y, w, h){
+        this.context.clearRect(x, y, w, h);
+    };
+
     /**
      * Abstract method, which need to be override by sub class
      */
@@ -249,15 +263,17 @@ window.zChart = window.zChart || {};
      * tooltip
      */
     p.createTooltip = function(){
-        this._tipCanvas = document.createElement('canvas');
-        this._tipCanvas.width = 100;
-        this._tipCanvas.height = TOOLTIP_H;
-        this._tipCanvas.style.position = "absolute";
-        if (this.canvas.nextSibling) {
-            this.canvas.parentNode.insertBefore(this._tipCanvas, this.canvas.nextSibling);
-        }
-        else {
-            this.canvas.parentNode.appendChild(this._tipCanvas);
+        if(this._tipCanvas === undefined){
+            this._tipCanvas = document.createElement('canvas');
+            this._tipCanvas.width = 100;
+            this._tipCanvas.height = TOOLTIP_H;
+            this._tipCanvas.style.position = "absolute";
+            if (this.canvas.nextSibling) {
+                this.canvas.parentNode.insertBefore(this._tipCanvas, this.canvas.nextSibling);
+            }
+            else {
+                this.canvas.parentNode.appendChild(this._tipCanvas);
+            }
         }
     };
 
@@ -266,7 +282,7 @@ window.zChart = window.zChart || {};
     };
 
     p.hideTooltip = function(){
-        this._tipCanvas.style.left = "-" + (this._tipCanvas.width + 100) + "px";
+        this._tipCanvas.style.left = "-" + (this._tipCanvas.width + 2000) + "px";
     };
 
     /**
@@ -407,15 +423,14 @@ window.zChart = window.zChart || {};
                 var points = [];
                 var lWidth = this.calculateLabelWidth(value);
                 points.push({x:this._origin.x - SCALE_WIDTH, y:currentY});
+                if(this.showGrid){
+                    points.push({x:xAxisEndX, y:currentY});
+                }
                 this.drawLines(this._origin.x, currentY, points, lineWidth, "#e5e5e5");
 
                 this.drawLabel(labelX + (this._labelWidth - (lWidth + SCALE_WIDTH)), currentY + 4, value, 'left');
             }
         }
-    };
-
-    p.clearRect = function(x, y, w, h){
-        this.context.clearRect(x, y, w, h);
     };
 
     p.drawDataArea = function(){
@@ -485,7 +500,7 @@ window.zChart = window.zChart || {};
     var BarChart = function(ctx, param){
         global.AxesChart.call(this, ctx, param);
 
-        this._dataArea = [];
+        this._dataArea;
 
     };
 
@@ -508,6 +523,8 @@ window.zChart = window.zChart || {};
             yAxisLength = this.getYAxisLength(),
             ratio       = yAxisLength/this.getMaxScale(),
             xField      = this.getXFields()[0];  // get the first xField
+
+        this._dataArea = [];
 
         for(var i = 0; i < data.length; i++){
             var label = data[i][xField];

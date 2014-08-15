@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html xmlns="http://www.w3.org/1999/html">
 <head lang="en">
     <meta charset="UTF-8">
     <title>zChart Sample</title>
@@ -8,30 +8,45 @@
             background-color: black;
         }
 
-        div.container {
+        div.content{
             width: 100%;
             height: 100%;
-            text-align: center;
             padding-top: 100px;
+            position: relative;
         }
 
         div.wrapper {
+            position: relative;
             padding: 0px;
+            margin-left: -512px;
+            left : 50%;
+            width: 1024px;
+
         }
 
         canvas.container {
             background-color: white;
+        }
+
+        .content input {
+            position: absolute;
+            top: 100px;
+            right: 50px;
         }
     </style>
     <script type="text/javascript" src="../release/zChart.js"></script>
 </head>
 <body>
 <div>
-    <div class="wrapper">
-        <canvas id="zChartCanvas" class="container" width="1024px" height="500px"></canvas>
+    <div class="content">
+        <div class="wrapper">
+            <canvas id="zChartCanvas" class="container" width="1024px" height="500px"></canvas>
+        </div>
+        <input type="button" onclick="changeData()" value="Change Data"></input>
     </div>
+
     <script>
-        var data    = [
+        var data1    = [
             {day:'Jul 1',  h:28, l:19},
             {day:'Jul 2',  h:29, l:21},
             {day:'Jul 3',  h:31, l:22},
@@ -43,19 +58,42 @@
             {day:'Jul 9',  h:30, l:19},
             {day:'Jul 10', h:36, l:25},
             {day:'Jul 11', h:37, l:27},
-            {day:'Jul 12', h:32, l:21}
+            {day:'Jul 12', h:32, l:21},
+            {day:'Jul 13', h:31, l:19},
+            {day:'Jul 14', h:37, l:28},
+            {day:'Jul 15', h:38, l:29}
         ];
+
+        var data2    = [
+            {day:'Jul 16',  h:38, l:29},
+            {day:'Jul 17',  h:39, l:31},
+            {day:'Jul 18',  h:37, l:28},
+            {day:'Jul 19',  h:38, l:29},
+            {day:'Jul 20',  h:39, l:28},
+            {day:'Jul 21',  h:40, l:30},
+            {day:'Jul 22',  h:38, l:29},
+            {day:'Jul 23',  h:37, l:30},
+            {day:'Jul 24',  h:36, l:29},
+            {day:'Jul 25',  h:35, l:25},
+            {day:'Jul 26',  h:34, l:27},
+            {day:'Jul 27',  h:34, l:24},
+            {day:'Jul 28',  h:35, l:23},
+            {day:'Jul 29',  h:33, l:21},
+            {day:'Jul 30',  h:32, l:19},
+            {day:'Jul 31',  h:31, l:22}
+        ];
+
         var param   =  {
-            dataProvider: data,
+            dataProvider: data1,
             animated:true,
             showTooltip: true,
             showLegend: true,
-            showGrid: false, // background grid
+            showGrid: true, // background grid
             title: {
                 label:'Temperature of Beijing in July ',
                 color:"#555",
                 font:"bold 15pt Segoe UI Light",
-                top:20
+                top:30
             },
             series: [{
                 xField: 'day',
@@ -81,6 +119,12 @@
         var canvas = document.getElementById("zChartCanvas");
         var chart = new zChart.BarChart(canvas, param);
         chart.drawChart();
+
+        function changeData(){
+            param.dataProvider = param.dataProvider === data1 ? data2 : data1;
+            chart.setParameter(param);
+            chart.reload();
+        }
     </script>
 </div>
 </body>

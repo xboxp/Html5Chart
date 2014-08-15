@@ -56,15 +56,14 @@
                 var points = [];
                 var lWidth = this.calculateLabelWidth(value);
                 points.push({x:this._origin.x - SCALE_WIDTH, y:currentY});
+                if(this.showGrid){
+                    points.push({x:xAxisEndX, y:currentY});
+                }
                 this.drawLines(this._origin.x, currentY, points, lineWidth, "#e5e5e5");
 
                 this.drawLabel(labelX + (this._labelWidth - (lWidth + SCALE_WIDTH)), currentY + 4, value, 'left');
             }
         }
-    };
-
-    p.clearRect = function(x, y, w, h){
-        this.context.clearRect(x, y, w, h);
     };
 
     p.drawDataArea = function(){

@@ -7,7 +7,7 @@
     var BarChart = function(ctx, param){
         global.AxesChart.call(this, ctx, param);
 
-        this._dataArea = [];
+        this._dataArea;
 
     };
 
@@ -30,6 +30,8 @@
             yAxisLength = this.getYAxisLength(),
             ratio       = yAxisLength/this.getMaxScale(),
             xField      = this.getXFields()[0];  // get the first xField
+
+        this._dataArea = [];
 
         for(var i = 0; i < data.length; i++){
             var label = data[i][xField];
