@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/html">
 <head lang="en">
     <meta charset="UTF-8">
-    <title>zChart Sample</title>
+    <title>zChart | Bar chart Sample</title>
     <style type="text/css">
         body{
             background-color: black;
@@ -39,6 +39,8 @@
 <body>
 <div>
     <div class="content">
+        <!-- This div is very import. zChart will create a new canvas(tooltip canvas) in this div.
+        Make sure this div's position is relative or absolute and it's padding should be 0-->
         <div class="wrapper">
             <canvas id="zChartCanvas" class="container" width="1024px" height="500px"></canvas>
         </div>
@@ -93,14 +95,14 @@
                 label:'Temperature of Beijing in July ',
                 color:"#555",
                 font:"bold 15pt Segoe UI Light",
-                top:30
+                top:30  // the center point of title to the top
             },
             series: [{
-                xField: 'day',
+                xField: 'day',             // field name
                 yField: 'h',
-                fillColor: '#34866f',
-                strokeColor: '#000',
-                label: 'Highest'
+                fillColor: '#34866f',      // inner color
+                strokeColor: '#000',       // border color
+                label: 'Highest'           // used for tooltip and legend
             },
             {
                 xField: 'day',

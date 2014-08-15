@@ -6,9 +6,6 @@
 
     var BarChart = function(ctx, param){
         global.AxesChart.call(this, ctx, param);
-
-        this._dataArea;
-
     };
 
     var p = BarChart.prototype = Object.create(global.AxesChart.prototype);
