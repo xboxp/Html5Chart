@@ -22,7 +22,6 @@
             labelY      = y + 15,
             barX        = x,
             labelPadding= (series.length * itemWidth)/ 2,
-            xAxisLength = this.getXAxisLength(),
             yAxisLength = this.getYAxisLength(),
             ratio       = yAxisLength/this.getMaxScale(),
             xField      = this.getXFields()[0];  // get the first xField
@@ -69,18 +68,18 @@
                 var my = e.clientY - rect.top;
 
                 var showTip = false;
-                if(that.mouseIn(mx, my, origin.x, origin.y - yAxisLength, xAxisLength, yAxisLength)){
-                    for(var i = 0; i < that._dataArea.length; i++){
-                        if(that.mouseIn(mx, my, that._dataArea[i], origin.y - yAxisLength, seriesNum*itemWidth, yAxisLength)){
-                            tipCanvas.height = tipHeight;
-                            tipCanvas.width  = tipWidth + that.getDefaultPadding();
-                            tipCanvas.style.left = mx + "px";
-                            tipCanvas.style.top  = my - tipHeight + "px";
-                            that.customizeTooltip(tipCtx, data[i], series, tipCanvas.width, tipCanvas.height);
-                            showTip = true;
-                        }
+
+                for(var i = 0; i < that._dataArea.length; i++){
+                    if(that.mouseIn(mx, my, that._dataArea[i], origin.y - yAxisLength, seriesNum*itemWidth, yAxisLength)){
+                        tipCanvas.height = tipHeight;
+                        tipCanvas.width  = tipWidth + that.getDefaultPadding();
+                        tipCanvas.style.left = mx + "px";
+                        tipCanvas.style.top  = my - tipHeight + "px";
+                        that.customizeTooltip(tipCtx, data[i], series, tipCanvas.width, tipCanvas.height);
+                        showTip = true;
                     }
                 }
+
                 if(!showTip){
                     that.hideTooltip();
                 }
