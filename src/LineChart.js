@@ -127,10 +127,6 @@
         setTimeout(function(){
             that.drawCircle(pointX, pointY, RADIUS, color, sColor);
         }, time);
-    }
-
-    p.animateLineDrawing = function(){
-
     };
 
     p.clearCircle = function(x, y, radius)
@@ -162,7 +158,7 @@
 
     p.getLineInterval = function(data){
         return global.Utils.calculateXAxisItemWidth(data.length - 1, 0, this.getXAxisLength() - this.getPaddingRight());
-    }
+    };
 
     global.LineChart = LineChart;
 })(window.zChart);
