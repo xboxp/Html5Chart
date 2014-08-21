@@ -5,11 +5,14 @@
     var SCALE_WIDTH = 6;
     var LINE_COLOR  = "gray";
 
+    /**
+     * Charts with Axes, such as BarChart, LineChart
+     */
     var AxesChart = function(ctx, param){
         global.BaseChart.call(this, ctx, param);
 
-        this._labelWidth = 40;
-        this._labelHeight = 20;
+        this._yLabelWidth = 40;
+        this._yLabelHeight = 20;
     };
 
     var p = AxesChart.prototype = Object.create(global.BaseChart.prototype);
@@ -21,8 +24,8 @@
     };
 
     p.drawAxes = function(){
-        this._origin = {x:(this.getDefaultPadding() + this._labelWidth),
-            y:(this.height - this.getFooterHeight() - this._labelHeight)};
+        this._origin = {x:(this.getDefaultPadding() + this._yLabelWidth),
+            y:(this.height - this.getFooterHeight() - this._yLabelHeight)};
         this.setXAxisLength(this.width - this.getPaddingRight() - this._origin.x);
         this.setYAxisLength(this._origin.y - this.getHeaderHeight());
 
@@ -61,7 +64,7 @@
                 }
                 this.drawLines(this._origin.x, currentY, points, lineWidth, "#e5e5e5");
 
-                this.drawLabel(labelX + (this._labelWidth - (lWidth + SCALE_WIDTH)), currentY + 4, value, 'left');
+                this.drawLabel(labelX + (this._yLabelWidth - (lWidth + SCALE_WIDTH)), currentY + 4, value, 'left');
             }
         }
     };

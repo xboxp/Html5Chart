@@ -2,7 +2,6 @@
  * Created by David Zhang on 2014/8/6.
  */
 (function(global){
-    var TOOLTIP_FONT = "10px Segoe UI Light";
 
     var BarChart = function(ctx, param){
         global.AxesChart.call(this, ctx, param);
@@ -31,9 +30,11 @@
         this._dataArea = [];
 
         for(var i = 0; i < data.length; i++){
-            var label = data[i][xField];
+            var label       = data[i][xField],
+                labelWidth  = this.calculateLabelWidth(label) > itemWidth ? itemWidth : this.calculateLabelWidth(label);
+
             barX += itemWidth;
-            labelX = barX + labelPadding - this.calculateLabelWidth(label)/2;
+            labelX = barX + labelPadding - labelWidth/2;
             //draw label
             this.drawLabel(labelX, labelY, label, 'middle');
             this._dataArea.push(barX);
@@ -62,7 +63,7 @@
                 tipCanvas = this.getTooltip(),
                 tipCtx = tipCanvas.getContext('2d'),
                 tipHeight = series.length*(this.getTooltipDefaultHeight() + 2),
-                tipWidth  = this.getMaxLabelWidth(this.getMax(), series, TOOLTIP_FONT);
+                tipWidth  = this.getMaxLabelWidth(this.getMax(), series, this.getTooltipFont());
             this.canvas.onmousemove = function onMouseOver(e) {
                 var mx = e.clientX - rect.left;
                 var my = e.clientY - rect.top;
@@ -74,7 +75,7 @@
                             tipCanvas.height = tipHeight;
                             tipCanvas.width  = tipWidth + that.getDefaultPadding();
                             tipCanvas.style.left = mx + "px";
-                            tipCanvas.style.top  = my-tipHeight + "px";
+                            tipCanvas.style.top  = my - tipHeight + "px";
                             that.customizeTooltip(tipCtx, data[i], series, tipCanvas.width, tipCanvas.height);
                             showTip = true;
                         }
@@ -85,29 +86,6 @@
                 }
             };
         }
-    };
-
-    p.customizeTooltip = function(tipCtx, data, series, width, height){
-        tipCtx.clearRect(0, 0, width, height);
-        tipCtx.beginPath();
-        tipCtx.rect(0, 0, width, height);
-        tipCtx.fillStyle = "white";
-        tipCtx.fill();
-        tipCtx.lineWidth = 1;
-        tipCtx.strokeStyle = "gray";
-        tipCtx.stroke();
-        tipCtx.font = TOOLTIP_FONT;
-        tipCtx.fillStyle = "black";
-        tipCtx.textAlign = 'left';
-        for(var i = 0; i < series.length; i++){
-            var yField = series[i].yField,
-                yFieldLabel = series[i].label === undefined ? yField : series[i].label;
-            tipCtx.fillText(this.tooltipLabelFunc(yFieldLabel, data[yField], this.getYAxisLabelFunc()), 2, this.getTooltipDefaultHeight()*(i+1));
-        }
-    };
-
-    p.mouseIn = function(x, y, rectX, rectY, rectWidth, rectHeight){
-        return global.Utils.mouseIn(x, y, rectX, rectY, rectWidth, rectHeight);
     };
 
     p.animateBarDrawing = function(x, y, width, height, color, sColor){
@@ -132,21 +110,6 @@
 
     p.getBarWidth = function(data, series){
         return global.Utils.calculateXAxisItemWidth(data.length, series.length, this.getXAxisLength() - this.getPaddingRight());
-    };
-
-    p.getMaxLabelWidth = function(max, series){
-        var widthArray = [];
-        for(var i = 0; i < series.length; i++){
-            widthArray.push({width:this.calculateLabelWidth(this.tooltipLabelFunc(series[i].label, max, this.getYAxisLabelFunc()), TOOLTIP_FONT)});
-        }
-        return global.Utils.max(widthArray, 'width');
-    };
-
-    p.tooltipLabelFunc = function(label, value, labelFunc){
-        if(labelFunc){
-            value = labelFunc.call(null, value);
-        }
-        return label + ":" + value;
     };
 
     global.BarChart = BarChart;

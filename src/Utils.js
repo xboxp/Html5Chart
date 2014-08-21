@@ -100,11 +100,16 @@ window.zChart = window.zChart || {};
         },
 
         calculateXAxisItemWidth : function(dataLength, seriesNum, totalLength){
-            var result = 0;
-            var maxWidth = 300;
-            var eachItemWidth = totalLength/dataLength/(seriesNum+1);  // +1 to give room to gap
+            var result = 0,
+                maxWidth = 300,
+                eachItemWidth = maxWidth;
+
+            if(dataLength > 0){
+                eachItemWidth =  totalLength/dataLength/(seriesNum+1);  // +1 to give room to gap
+            }
+
             if(eachItemWidth > 1){
-                result = eachItemWidth < maxWidth ? this.floor(eachItemWidth) : maxWidth;
+                result = eachItemWidth <= maxWidth ? this.floor(eachItemWidth) : maxWidth;
             }else{
                 result = 1;
             }
@@ -122,6 +127,14 @@ window.zChart = window.zChart || {};
                 return true;
             }
             return false;
+        },
+
+        mouseInCircle : function(x, y, cX, cY, cR){
+            var distX = Math.abs(x - cX),
+                distY = Math.abs(y - cY),
+                dist  = Math.sqrt(distX * distX + distY * distY);
+
+            return dist < cR;
         }
     };
 

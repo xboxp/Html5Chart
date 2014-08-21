@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/html">
 <head lang="en">
     <meta charset="UTF-8">
-    <title>zChart | Bar chart Sample</title>
+    <title>zChart | Line chart Sample</title>
     <style type="text/css">
         body{
             background-color: black;
@@ -90,7 +90,7 @@
             animated:true,
             showTooltip: true,
             showLegend: true,
-            showGrid: false, // background grid
+            showGrid: true, // background grid
             title: {
                 label:'Temperature of Beijing in July ',
                 color:"#555",
@@ -100,7 +100,7 @@
             series: [{
                 xField: 'day',             // field name
                 yField: 'h',
-                fillColor: '#34866f',      // inner color
+//                fillColor: '#34866f',      // inner color
                 strokeColor: '#34866f',       // border color
                 label: 'Highest'           // used for tooltip and legend
             },
@@ -119,7 +119,7 @@
         };
 
         var canvas = document.getElementById("zChartCanvas");
-        var chart = new zChart.BarChart(canvas, param);
+        var chart = new zChart.LineChart(canvas, param);
         chart.drawChart();
 
         function changeData(){
