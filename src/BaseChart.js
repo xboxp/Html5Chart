@@ -5,14 +5,16 @@ window.zChart = window.zChart || {};
 
 (function(global){
     var PADDING     = 5,  // default padding
-        TOOLTIP_H   = 13,
+        TOOLTIP_H   = 23,
+        TOOLTIP_LINE_H = 13,
         minWidth    = 100,
         minHeight   = 6 * PADDING,
         DEFAULT_TITLE_FONT = "14px Segoe UI Light",
         DEFAULT_FONT = "12px Segoe UI Light",
         LEGEND_ICON_WIDTH = 30,
         LEGEND_ICON_HEIGHT = 10,
-        TOOLTIP_FONT = "10px Segoe UI Light";
+        TOOLTIP_FONT = "10px Segoe UI Light",
+        TOOLTIP_RADIUS = 5;
 
     var BaseChart = function(canvas, parameters){
         this.canvas = canvas;
@@ -158,22 +160,46 @@ window.zChart = window.zChart || {};
         this._tipCanvas.style.left = "-" + (this._tipCanvas.width + 2000) + "px";
     };
 
-    p.customizeTooltip = function(tipCtx, data, series, width, height){
-        tipCtx.clearRect(0, 0, width, height);
+    p.customizeTooltip = function(tipCtx, data, series, width, rawHeight){
+        var x = 0, y = 0, triangleHeight = 6, height = rawHeight - triangleHeight;
+
+        tipCtx.clearRect(x, y, width, height);
+
         tipCtx.beginPath();
-        tipCtx.rect(0, 0, width, height);
-        tipCtx.fillStyle = "white";
-        tipCtx.fill();
-        tipCtx.lineWidth = 1;
-        tipCtx.strokeStyle = "gray";
+        tipCtx.moveTo(x + TOOLTIP_RADIUS, y);
+        tipCtx.lineTo(x + width - TOOLTIP_RADIUS, y);
+        tipCtx.quadraticCurveTo(x + width, y, x + width, y + TOOLTIP_RADIUS);
+        tipCtx.lineTo(x + width, y + height - TOOLTIP_RADIUS);
+        tipCtx.quadraticCurveTo(x + width, y + height, x + width - TOOLTIP_RADIUS, y + height);
+        // start triangle
+        tipCtx.lineTo(x + width/2 + triangleHeight/2, y + height);
+        tipCtx.lineTo(x + width/2, y + rawHeight);
+        tipCtx.lineTo(x + width/2 - triangleHeight/2, y + height);
+        // end of triangle
+        tipCtx.lineTo(x + TOOLTIP_RADIUS, y + height);
+        tipCtx.quadraticCurveTo(x, y + height, x, y + height - TOOLTIP_RADIUS);
+        tipCtx.lineTo(x, y + TOOLTIP_RADIUS);
+        tipCtx.quadraticCurveTo(x, y, x + TOOLTIP_RADIUS, y);
+        tipCtx.closePath();
+        tipCtx.strokeStyle = "black";
         tipCtx.stroke();
+        tipCtx.fillStyle = "rgba(0, 0, 0, 0.7)";
+        tipCtx.fill();
+
+//        tipCtx.beginPath();
+//        tipCtx.rect(0, 0, width, height);
+//        tipCtx.fillStyle = "white";
+//        tipCtx.fill();
+//        tipCtx.lineWidth = 1;
+//        tipCtx.strokeStyle = "gray";
+//        tipCtx.stroke();
         tipCtx.font = TOOLTIP_FONT;
-        tipCtx.fillStyle = "black";
+        tipCtx.fillStyle = "white";
         tipCtx.textAlign = 'left';
         for(var i = 0; i < series.length; i++){
             var yField = series[i].yField,
                 yFieldLabel = series[i].label === undefined ? yField : series[i].label;
-            tipCtx.fillText(this.tooltipLabelFunc(yFieldLabel, data[yField], this.getYAxisLabelFunc()), 2, this.getTooltipDefaultHeight()*(i+1));
+            tipCtx.fillText(this.tooltipLabelFunc(yFieldLabel, data[yField], this.getYAxisLabelFunc()), 2, this.getTooltipDefaultLineHeight()*(i+1));
         }
     };
 
@@ -240,6 +266,10 @@ window.zChart = window.zChart || {};
 
     p.getTooltipDefaultHeight = function(){
         return TOOLTIP_H;
+    };
+
+    p.getTooltipDefaultLineHeight = function(){
+        return TOOLTIP_LINE_H;
     };
 
     p.getTooltipFont = function(){

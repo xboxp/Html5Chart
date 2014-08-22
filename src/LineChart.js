@@ -80,7 +80,7 @@
                 rect = this.canvas.getBoundingClientRect(),
                 tipCanvas = this.getTooltip(),
                 tipCtx = tipCanvas.getContext('2d'),
-                tipHeight = this.getTooltipDefaultHeight() + 4,
+                tipHeight = this.getTooltipDefaultHeight() + 2,
                 tipWidth  = this.getMaxLabelWidth(this.getMax(), series, this.getTooltipFont());
 
             this.canvas.onmousemove = function onMouseOver(e) {
@@ -95,7 +95,7 @@
                         if(that.mouseInCircle(mx, my, currentPoint.x, currentPoint.y, RADIUS)){
                             tipCanvas.height = tipHeight;
                             tipCanvas.width  = tipWidth + that.getDefaultPadding();
-                            tipCanvas.style.left = mx + "px";
+                            tipCanvas.style.left = mx - tipCanvas.width/2 + "px" ;
                             tipCanvas.style.top  = my - tipHeight + "px";
                             that.customizeTooltip(tipCtx, data[j], [series[i]], tipCanvas.width, tipCanvas.height);
                             showTip = true;
