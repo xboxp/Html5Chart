@@ -1,7 +1,7 @@
 ## zChart
 
 zChart is a HTML5 chart library which use canvas element to draw 2D chart. Simple bar chart and line chart are included. 
-It is highly customizable and supports tooltip and animation. Please visit [Demo Page](http://xboxp.com).
+It is highly customizable and supports tooltip and animation.
 
 ![zChart](https://raw.githubusercontent.com/xboxp/Html5Chart/master/barchart.png)
 ![zChart](https://raw.githubusercontent.com/xboxp/Html5Chart/master/linechart.png)
